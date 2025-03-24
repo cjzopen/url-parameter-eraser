@@ -23,7 +23,7 @@
       }
     },
     "condition": {
-      "regexFilter": ".*[?&](stm_|clid|_hs|icid|igshid|mc_)=[^&]*",
+      "regexFilter": ".*[?&](stm_|clid|_hs|hsa_|icid|igshid|mc_)=[^&]*",
       "resourceTypes": ["main_frame", "sub_frame"]
     }
   },
@@ -52,6 +52,20 @@
     },
     "condition": {
       "regexFilter": ".*[?&](cvid|oicd|vgo_ee|_gl|_ga)=[^&]*",
+      "resourceTypes": ["main_frame", "sub_frame"]
+    }
+  },
+  {
+    "id": 5,
+    "priority": 1,
+    "action": {
+      "type": "redirect",
+      "redirect": {
+        "regexSubstitution": "\\0"
+      }
+    },
+    "condition": {
+      "regexFilter": ".*[?&](srsltid|gs_lcrp|gclid|gad_source)=[^&]*",
       "resourceTypes": ["main_frame", "sub_frame"]
     }
   }
