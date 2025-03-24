@@ -1,0 +1,12 @@
+_metadata
+
+
+
+.DS_Store
+.fleet
+.idea
+thumbs.db
+
+
+node_modules
+npm-debug.log
