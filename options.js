@@ -3,11 +3,17 @@ document.addEventListener('DOMContentLoaded', function() {
   const addButton = document.getElementById('add');
   const paramsList = document.getElementById('paramsList');
 
+  // 限制輸入內容
+  customParamsInput.addEventListener('input', function() {
+    this.value = this.value.replace(/[^a-zA-Z0-9\-_\.]/g, ''); // 僅允許英文、數字、-、_、.
+  });
+
+  // 從全局變數讀取 defaultParams
   let defaultParams = Array.isArray(window.defaultParams) ? [...window.defaultParams] : [];
 
   // 儲存自訂參數
   addButton.addEventListener('click', function() {
-    const customParams = customParamsInput.value.split(',').map(param => param.trim()).filter(param => param);
+    let customParams = customParamsInput.value.split(',').map(param => param.trim()).filter(param => param);
     getStoredParams(['url_parameter_eraser_params'], function(data) {
       const existingParams = Array.isArray(data.url_parameter_eraser_params) ? data.url_parameter_eraser_params : [];
       const updatedParams = [...new Set([...existingParams, ...customParams])];
@@ -22,7 +28,6 @@ document.addEventListener('DOMContentLoaded', function() {
   // 加載已保存的設置
   getStoredParams(['url_parameter_eraser_params', 'defaultParams'], function(data) {
     const customParams = Array.isArray(data.url_parameter_eraser_params) ? data.url_parameter_eraser_params : [];
-    defaultParams = Array.isArray(data.defaultParams) ? data.defaultParams : defaultParams;
     updateParamsList(paramsList, defaultParams, customParams, deleteDefaultParam, deleteCustomParam);
   });
 

@@ -15,18 +15,52 @@
 }
 body {
   font-family: Arial, sans-serif;
-  padding: 20px;
+  padding: 0;
+  margin: 0;
   font-size: 16px;
+  background-color: #dfdfdf;
+  color: #333;
+}
+* {
+  box-sizing: border-box;
+}
+#all {
+  padding: 16px;
+}
+button, input {
+  appearance: none;
+  -webkit-appearance: none;
+  border: none;
+  outline: none;
+  background: none;
+  font-size: inherit;
+}
+#customParams {
+  padding: 8px;
+  margin: 8px 0;
+  border-bottom: 1px solid var(--main-color);
+}
+#add {
+  padding: 8px 16px;
+  border-radius: 4px;
+  background-color: var(--main-color);
+  color: var(--white-color);
+  cursor: pointer;
+  &:hover {
+    background-color: var(--main-color-hover);
+  }
 }
 #paramsList {
   list-style-type: none;
   padding: 0;
 }
+#paramsList * {
+  text-box: trim-both cap alphabetic;
+}
 #paramsList li {
   display: inline-flex;
   justify-content: space-between;
   align-items: center;
-  text-box: trim-both cap alphabetic;
   padding: 8px;
   box-shadow: 0 0 0 1px var(--main-color);
   background-color: var(--main-color);
@@ -35,16 +69,11 @@ body {
   margin: 4px;
 }
 #paramsList li button {
-  appearance: none;
-  -webkit-appearance: none;
-  border: none;
-  outline: none;
   cursor: pointer;
-  background: none;
-  font-size: inherit;
   margin-left: 5px;
 }
 </style>
+<div id="all">
   <h1>設定</h1>
   <div>
     <label for="customParams">新增自訂參數：</label>
@@ -53,5 +82,6 @@ body {
   </div>
   <h2>現有參數</h2>
   <ul id="paramsList"></ul>
+</div>
 </body>
 </html>

@@ -1,7 +1,7 @@
 let paramPattern = null;
 
 // 初始化 paramPattern
-function initializeParamPattern(callback) {
+function initParamPattern(callback) {
   getStoredParams(['url_parameter_eraser_params', 'defaultParams'], function(data) {
     const defaultParams = Array.isArray(data.defaultParams) ? data.defaultParams : window.defaultParams;
     const customParams = data.url_parameter_eraser_params || [];
@@ -27,7 +27,7 @@ function processLinks() {
       let params = new URLSearchParams(url.search);
       let modified = false;
 
-      // 收集所有參數的鍵，然後逐一刪除
+      // 收集所有參數的 key 逐一刪除
       const keys = Array.from(params.keys());
       keys.forEach(param => {
         if (paramPattern.test(param)) {
@@ -39,8 +39,8 @@ function processLinks() {
       if (modified) {
         url.search = params.toString();
         link.href = url.toString();
-        link.style.outline = '1px dashed green';
-        console.log("URL Parameter Eraser: Modified link:", link.href);
+        link.style.outline = '1px dashed rgba(203, 15, 255, 0.2)';
+        // console.log("URL Parameter Eraser: Modified link:", link.href);
       }
     } catch (error) {
       console.warn("Skipping invalid URL:", link.href, error);
@@ -59,7 +59,7 @@ function cleanCurrentPageURL() {
     let params = new URLSearchParams(url.search);
     let modified = false;
 
-    // 收集所有參數 key，然後逐一刪除
+    // 收集所有參數的 key 逐一刪除
     const keys = Array.from(params.keys());
     keys.forEach(param => {
       if (paramPattern.test(param)) {
@@ -95,14 +95,14 @@ function observeDOMChanges() {
 // 初始化
 if (document.readyState === 'loading') {
   document.addEventListener('DOMContentLoaded', () => {
-    initializeParamPattern(() => {
+    initParamPattern(() => {
       cleanCurrentPageURL();
       processLinks();
       observeDOMChanges();
     });
   });
 } else {
-  initializeParamPattern(() => {
+  initParamPattern(() => {
     cleanCurrentPageURL();
     processLinks();
     observeDOMChanges();
