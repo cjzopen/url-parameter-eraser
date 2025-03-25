@@ -3,15 +3,55 @@
 <head>
   <meta charset="utf-8">
   <title>URL Parameter Eraser Options</title>
+  <script src="function.js" defer></script>
   <script src="options.js" defer></script>
 </head>
 <body>
+<style>
+:root {
+  --main-color:#345;
+  --main-color-hover:#678;
+  --white-color:#f5ebc4;
+}
+body {
+  font-family: Arial, sans-serif;
+  padding: 20px;
+  font-size: 16px;
+}
+#paramsList {
+  list-style-type: none;
+  padding: 0;
+}
+#paramsList li {
+  display: inline-flex;
+  justify-content: space-between;
+  align-items: center;
+  text-box: trim-both cap alphabetic;
+  padding: 8px;
+  box-shadow: 0 0 0 1px var(--main-color);
+  background-color: var(--main-color);
+  color: var(--white-color);
+  border-radius: 20px;
+  margin: 4px;
+}
+#paramsList li button {
+  appearance: none;
+  -webkit-appearance: none;
+  border: none;
+  outline: none;
+  cursor: pointer;
+  background: none;
+  font-size: inherit;
+  margin-left: 5px;
+}
+</style>
   <h1>設定</h1>
-  <label for="customParams">自訂參數：</label>
-  <input type="text" id="customParams" placeholder="例如：param1,param2">
-  <button id="save">儲存</button>
-  <h2>白名單</h2>
-  <textarea id="whitelist" placeholder="例如：www.example.com"></textarea>
-  <button id="saveWhitelist">儲存白名單</button>
+  <div>
+    <label for="customParams">新增自訂參數：</label>
+    <input type="text" id="customParams" placeholder="例如：utm_source">
+    <button id="add">新增</button>
+  </div>
+  <h2>現有參數</h2>
+  <ul id="paramsList"></ul>
 </body>
 </html>

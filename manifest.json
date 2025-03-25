@@ -3,15 +3,6 @@
   "name": "URL Parameter Eraser",
   "version": "1.0",
   "description": "移除網址中的追蹤參數，保護您的隱私。",
-  "declarative_net_request": {
-    "rule_resources": [
-      {
-        "id": "ruleset_1",
-        "enabled": true,
-        "path": "rule1.json"
-      }
-    ]
-  },
   "permissions": [
     "declarativeNetRequest",
     "declarativeNetRequestFeedback",
@@ -33,7 +24,7 @@
       "128": "icons/icon128.png"
     }
   },
-  "options_page": "info.html",
+  "options_page": "options.html",
   "icons": {
     "16": "icons/icon16.png",
     "48": "icons/icon48.png",
@@ -42,7 +33,7 @@
   "content_scripts": [
     {
       "matches": ["<all_urls>"],
-      "js": ["url-parameter-eraser_params.js", "content.js"],
+      "js": ["function.js","url-parameter-eraser.js"],
       "type": "module"
     }
   ]

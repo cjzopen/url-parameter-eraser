@@ -65,7 +65,7 @@
       }
     },
     "condition": {
-      "regexFilter": ".*[?&](srsltid|gs_lcrp|gclid|gad_source)=[^&]*",
+      "regexFilter": ".*[?&](srsltid|gs_lcrp|gclid|gad_source|sxsrf|sca_esv)=[^&]*",
       "resourceTypes": ["main_frame", "sub_frame"]
     }
   }
