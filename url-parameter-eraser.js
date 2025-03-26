@@ -1,4 +1,5 @@
 let paramPattern = null;
+let modifiedCount = 0; // 記錄更改的連結數量
 
 // 初始化 paramPattern
 function initParamPattern(callback) {
@@ -20,6 +21,7 @@ function processLinks() {
   }
 
   const links = document.querySelectorAll('a');
+
   links.forEach(link => {
     try {
       if (!link.href) return; // 檢查 href 是否存在
@@ -40,12 +42,15 @@ function processLinks() {
         url.search = params.toString();
         link.href = url.toString();
         link.style.outline = '1px dashed rgba(203, 15, 255, 0.2)';
-        // console.log("URL Parameter Eraser: Modified link:", link.href);
+        modifiedCount++; // 增加更改計數
       }
     } catch (error) {
       console.warn("Skipping invalid URL:", link.href, error);
     }
   });
+
+  // 更新擴充套件圖示上的 badge
+  chrome.runtime.sendMessage({ action: 'updateBadge', count: modifiedCount });
 }
 
 // 清除當前頁面 URL 中特定的參數

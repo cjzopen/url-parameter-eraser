@@ -1,8 +1,8 @@
 {
   "manifest_version": 3,
-  "name": "URL Parameter Eraser",
-  "version": "1.0",
-  "description": "移除網址中的追蹤參數，保護您的隱私。",
+  "name": "URL Parameter Eraser BETA",
+  "version": "0.9.0",
+  "description": "THIS EXTENSION IS FOR BETA TESTING. Reclaim Your Digital Footprint: Erase Tracking Parameters from Your URLs. 移除網址中的追蹤參數，保護您的隱私。",
   "permissions": [
     "declarativeNetRequest",
     "declarativeNetRequestFeedback",

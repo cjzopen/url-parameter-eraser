@@ -10,3 +10,11 @@
 //   console.log("Dynamic rules loaded:", rules);
 // });
 
+chrome.runtime.onMessage.addListener((message, sender, sendResponse) => {
+  if (message.action === 'updateBadge') {
+    const count = message.count;
+    const badgeText = count > 99 ? '99+' : count > 0 ? count.toString() : '';
+    chrome.action.setBadgeText({ text: badgeText });
+    chrome.action.setBadgeBackgroundColor({ color: '#ff2453' });
+  }
+});
