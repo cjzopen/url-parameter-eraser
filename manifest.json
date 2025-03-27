@@ -1,8 +1,9 @@
 {
   "manifest_version": 3,
-  "name": "URL Parameter Eraser BETA",
+  "name": "__MSG_extensionName__",
   "version": "0.9.0",
-  "description": "THIS EXTENSION IS FOR BETA TESTING. Reclaim Your Digital Footprint: Erase Tracking Parameters from Your URLs. 移除網址中的追蹤參數，保護您的隱私。",
+  "description": "__MSG_extensionDescription__",
+  "default_locale": "en",
   "permissions": [
     "declarativeNetRequest",
     "declarativeNetRequestFeedback",
@@ -33,7 +34,7 @@
   "content_scripts": [
     {
       "matches": ["<all_urls>"],
-      "js": ["function.js","url-parameter-eraser.js"],
+      "js": ["function.js", "url-parameter-eraser.js"],
       "type": "module"
     }
   ]

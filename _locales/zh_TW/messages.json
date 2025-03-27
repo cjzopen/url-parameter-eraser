@@ -1,0 +1,44 @@
+{
+  "extensionName": {
+    "message": "URL Parameter Eraser BETA"
+  },
+  "extensionDescription": {
+    "message": "THIS EXTENSION IS FOR BETA TESTING。移除網址中的追蹤參數，保護您的隱私。"
+  },
+  "optionsTitle": {
+    "message": "設定"
+  },
+  "optionsAddLabel": {
+    "message": "新增自訂參數："
+  },
+  "optionsAddButton": {
+    "message": "新增"
+  },
+  "optionsExistingParams": {
+    "message": "現有參數"
+  },
+  "popupTitle": {
+    "message": "URL Parameter Eraser"
+  },
+  "popupOptionsButton": {
+    "message": "設定"
+  },
+  "popupInfoButton": {
+    "message": "介紹"
+  },
+  "infoTitle": {
+    "message": "介紹"
+  },
+  "infoDescription": {
+    "message": "URL Parameter Eraser 會把當前頁面網址的追蹤碼刪除。除此之外，還會把當前頁面含有追蹤碼的網址改寫，並加上紫色的 dash outline。"
+  },
+  "infoPrivacyTitle": {
+    "message": "隱私"
+  },
+  "infoPrivacyDescription": {
+    "message": "此擴充功能不會收集或儲存使用者的瀏覽紀錄或其他個人資訊。"
+  },
+  "infoContact": {
+    "message": "如果您有任何疑問，請寄信至 2012cjz@gmail.com。"
+  }
+}

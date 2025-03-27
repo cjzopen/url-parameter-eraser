@@ -2,10 +2,11 @@
 <html>
 <head>
   <meta charset="utf-8">
-  <title>URL Parameter Eraser</title>
+  <title>__MSG_popupTitle__</title>
   <script src="popup.js" defer></script>
+  <script src="i18n.js" defer></script>
 </head>
-<body>
+<body data-page="popup">
 <style>
 body {
   font-family: Arial, sans-serif;
@@ -31,8 +32,8 @@ button {
   cursor: pointer;
 }
 </style>
-  <p>URL Parameter Eraser</p>
-  <button id="options">設定</button>
-  <button id="info">介紹</button>
+  <p id="popupTitle">__MSG_popupTitle__</p>
+  <button id="options">__MSG_popupOptionsButton__</button>
+  <button id="info">__MSG_popupInfoButton__</button>
 </body>
 </html>

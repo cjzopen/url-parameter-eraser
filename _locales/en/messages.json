@@ -1,0 +1,44 @@
+{
+  "extensionName": {
+    "message": "URL Parameter Eraser BETA"
+  },
+  "extensionDescription": {
+    "message": "THIS EXTENSION IS FOR BETA TESTING. Reclaim Your Digital Footprint: Erase Tracking Parameters from Your URLs."
+  },
+  "optionsTitle": {
+    "message": "Settings"
+  },
+  "optionsAddLabel": {
+    "message": "Add Custom Parameter:"
+  },
+  "optionsAddButton": {
+    "message": "Add"
+  },
+  "optionsExistingParams": {
+    "message": "Existing Parameters"
+  },
+  "popupTitle": {
+    "message": "URL Parameter Eraser"
+  },
+  "popupOptionsButton": {
+    "message": "Settings"
+  },
+  "popupInfoButton": {
+    "message": "Info"
+  },
+  "infoTitle": {
+    "message": "Introduction"
+  },
+  "infoDescription": {
+    "message": "URL Parameter Eraser removes tracking parameters from the current page URL. It also rewrites links containing tracking parameters and adds a purple dashed outline."
+  },
+  "infoPrivacyTitle": {
+    "message": "Privacy"
+  },
+  "infoPrivacyDescription": {
+    "message": "This extension does not collect or store your browsing history or any personal information."
+  },
+  "infoContact": {
+    "message": "If you have any questions, please email 2012cjz@gmail.com."
+  }
+}
