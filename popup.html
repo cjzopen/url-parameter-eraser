@@ -12,6 +12,9 @@ body {
   font-family: Arial, sans-serif;
   font-size: 16px;
   padding: 16px;
+  background-color: #efefef;
+  color: #333;
+  line-height: 1.414;
 }
 p {
   font-size: 20px;
@@ -31,9 +34,30 @@ button {
   color: #f5ebc4;
   cursor: pointer;
 }
+#processedLinks {
+  width: 380px;
+  max-height: 400px;
+  overflow-x: hidden;
+  overflow-y: auto;
+}
+details {
+  margin-top: 16px;
+  & span {
+    font-size: 12px;
+    font-weight: 400;
+    white-space: nowrap;
+    text-overflow: ellipsis;
+  }
+}
+details summary {
+  font-size: 16px;
+  font-weight: bold;
+  cursor: pointer;
+}
 </style>
   <p id="popupTitle">__MSG_popupTitle__</p>
   <button id="options">__MSG_popupOptionsButton__</button>
   <button id="info">__MSG_popupInfoButton__</button>
+  <div id="processedLinks"></div>
 </body>
 </html>

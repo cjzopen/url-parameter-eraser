@@ -1,5 +1,7 @@
 let paramPattern = null;
 let modifiedCount = 0; // 記錄更改的連結數量
+let processedLinks = []; // 記錄處理的連結
+let tabId = null; // 當前分頁的 ID
 
 // 初始化 paramPattern
 function initParamPattern(callback) {
@@ -13,6 +15,27 @@ function initParamPattern(callback) {
     if (callback) callback();
   });
 }
+
+// 按分頁 ID 將數據保存到 storage
+function saveState() {
+  if (tabId !== null && modifiedCount >= 1) {
+    chrome.storage.local.set({ [`tab_${tabId}`]: { modifiedCount, processedLinks } });
+  }
+}
+
+// 從 chrome.storage.local 恢復數據，按分頁 ID 恢復
+// function restoreState(callback) {
+//   if (tabId !== null) {
+//     chrome.storage.local.get([`tab_${tabId}`], (data) => {
+//       const state = data[`tab_${tabId}`] || { modifiedCount: 0, processedLinks: [] };
+//       modifiedCount = state.modifiedCount;
+//       processedLinks = state.processedLinks;
+//       if (callback) callback();
+//     });
+//   } else if (callback) {
+//     callback();
+//   }
+// }
 
 // 尋找 HTML 的所有連結，並將 URL 中包含特定參數的部分刪除
 function processLinks() {
@@ -39,9 +62,20 @@ function processLinks() {
       });
 
       if (modified) {
+        const originalUrl = link.href; // 保存原始連結
         url.search = params.toString();
         link.href = url.toString();
         link.style.outline = '1px dashed rgba(203, 15, 255, 0.2)';
+
+        // 提取連結文字，限制最多 32 個字，並移除多餘的空白
+        const linkText = link.textContent.trim().substring(0, 32);
+
+        processedLinks.push({
+          original: originalUrl,
+          modified: link.href,
+          text: linkText
+        });
+
         modifiedCount++; // 增加更改計數
       }
     } catch (error) {
@@ -49,8 +83,15 @@ function processLinks() {
     }
   });
 
+  saveState();
+
   // 更新擴充套件圖示上的 badge
+  // console.log("URL Parameter Eraser: Modified links count:", modifiedCount);
   chrome.runtime.sendMessage({ action: 'updateBadge', count: modifiedCount });
+
+  // 傳遞處理後的連結
+  // console.log("URL Parameter Eraser: Processed links:", processedLinks);
+  chrome.runtime.sendMessage({ action: 'updateProcessedLinks', links: processedLinks });
 }
 
 // 清除當前頁面 URL 中特定的參數
@@ -76,7 +117,7 @@ function cleanCurrentPageURL() {
     if (modified) {
       url.search = params.toString();
       history.replaceState(null, '', url.toString());
-      console.log("URL Parameter Eraser: Cleaned current page URL:", url.toString());
+      // console.log("URL Parameter Eraser: Cleaned current page URL:", url.toString());
     }
   } catch (error) {
     console.warn("Failed to clean current page URL:", error);
@@ -98,18 +139,13 @@ function observeDOMChanges() {
 }
 
 // 初始化
-if (document.readyState === 'loading') {
-  document.addEventListener('DOMContentLoaded', () => {
+chrome.runtime.sendMessage({ action: 'getTabId' }, (response) => {
+  tabId = response.tabId;
+  // restoreState(() => {
     initParamPattern(() => {
       cleanCurrentPageURL();
       processLinks();
       observeDOMChanges();
     });
-  });
-} else {
-  initParamPattern(() => {
-    cleanCurrentPageURL();
-    processLinks();
-    observeDOMChanges();
-  });
-}
+  // });
+});
