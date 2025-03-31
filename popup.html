@@ -33,12 +33,18 @@ button {
   background-color: #345;
   color: #f5ebc4;
   cursor: pointer;
+  transition: all .3s ease;
+  &:active {
+    transform: scale(0.95);
+    transition: all .3s ease;
+  }
 }
 #processedLinks {
   width: 380px;
   max-height: 400px;
   overflow-x: hidden;
   overflow-y: auto;
+  scrollbar-width: thin;
 }
 details {
   margin-top: 16px;

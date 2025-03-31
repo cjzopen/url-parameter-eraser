@@ -36,26 +36,32 @@ document.addEventListener('DOMContentLoaded', function() {
           const textSpan = document.createElement('span');
           textSpan.textContent = `Text: ${link.text || '(No text)'}`;
 
-          const originalSpan = document.createElement('span');
-          originalSpan.textContent = `Original: ${link.original}`;
-          originalSpan.setAttribute('title', link.original);
+          // const originalSpan = document.createElement('span');
+          // originalSpan.textContent = `Original: ${link.original}`;
+          // originalSpan.setAttribute('title', link.original);
 
-          const modifiedSpan = document.createElement('span');
-          modifiedSpan.textContent = `Modified: ${link.modified}`;
-          modifiedSpan.setAttribute('title', link.modified);
+          // const modifiedSpan = document.createElement('span');
+          // modifiedSpan.textContent = `Modified: ${link.modified}`;
+          // modifiedSpan.setAttribute('title', link.modified);
+
+          const removedKeysSpan = document.createElement('span');
+          removedKeysSpan.textContent = `Removed Keys: ${link.removedKeys || '(None)'}`;
+          removedKeysSpan.setAttribute('title', link.removedKeys);
 
           p.appendChild(textSpan);
           p.appendChild(document.createElement('br'));
-          p.appendChild(originalSpan);
-          p.appendChild(document.createElement('br'));
-          p.appendChild(modifiedSpan);
+          // p.appendChild(originalSpan);
+          // p.appendChild(document.createElement('br'));
+          // p.appendChild(modifiedSpan);
+          // p.appendChild(document.createElement('br'));
+          p.appendChild(removedKeysSpan);
 
           details.appendChild(p);
         });
 
         processedLinksContainer.appendChild(details);
       } else {
-        processedLinksContainer.textContent = '';
+        processedLinksContainer.textContent = 'No links processed.';
       }
     });
   });

@@ -1,5 +1,5 @@
 window.defaultParams = [
-  '^utm_', '^stm_', '_gl', '_ga', 'clid', '_hs', 'hsa_', 'icid', 'igshid',
+  '^utm_', '^stm_', '_gl', '_ga', 'clid', '^__hs', 'hsa_', 'icid', 'igshid',
   'mc_', 'mkt_tok', 'yclid', '_openstat', 'wicked', 'jobsource',
   'otc', 'oly_', 'rb_clickid', 'soc_', 'cvid', 'oicd', 'vgo_ee',
   'srsltid', 'gs_lcrp', 'gclid', 'gad_source', 'sxsrf', 'sca_esv'

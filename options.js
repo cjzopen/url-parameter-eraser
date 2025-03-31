@@ -3,17 +3,30 @@ document.addEventListener('DOMContentLoaded', function() {
   const addButton = document.getElementById('add');
   const paramsList = document.getElementById('paramsList');
 
-  // 限制輸入內容
+  // 限制輸入內容並進行正則表達式轉義
   customParamsInput.addEventListener('input', function() {
-    this.value = this.value.replace(/[^a-zA-Z0-9\-_\.]/g, ''); // 僅允許英文、數字、-、_、.
+    // 僅允許以 ^ 開頭的文字，後續部分僅允許英文、數字、-、_、.
+    const regex = /^\^?[a-zA-Z0-9\-_\.]*$/;
+    if (!regex.test(this.value)) {
+      this.value = this.value.replace(/[^a-zA-Z0-9\-_\.]/g, ''); // 移除不合法字元
+      if (this.value[0] !== '^') {
+        this.value = this.value.replace(/[^a-zA-Z0-9\-_\.]/g, '');
+      }
+    }
   });
+
+  // 將文字轉義為正則表達式安全的格式
+  function escapeRegex(input) {
+    return input.replace(/[.*+?^${}()|[\]\\]/g, '\\$&');
+  }
 
   // 從全局變數讀取 defaultParams
   let defaultParams = Array.isArray(window.defaultParams) ? [...window.defaultParams] : [];
 
   // 儲存自訂參數
   addButton.addEventListener('click', function() {
-    let customParams = customParamsInput.value.split(',').map(param => param.trim()).filter(param => param);
+    let customParams = customParamsInput.value.split(',').map(param => escapeRegex(param.trim())).filter(param => param);
+
     getStoredParams(['url_parameter_eraser_params'], function(data) {
       const existingParams = Array.isArray(data.url_parameter_eraser_params) ? data.url_parameter_eraser_params : [];
       const updatedParams = [...new Set([...existingParams, ...customParams])];

@@ -23,20 +23,6 @@ function saveState() {
   }
 }
 
-// 從 chrome.storage.local 恢復數據，按分頁 ID 恢復
-// function restoreState(callback) {
-//   if (tabId !== null) {
-//     chrome.storage.local.get([`tab_${tabId}`], (data) => {
-//       const state = data[`tab_${tabId}`] || { modifiedCount: 0, processedLinks: [] };
-//       modifiedCount = state.modifiedCount;
-//       processedLinks = state.processedLinks;
-//       if (callback) callback();
-//     });
-//   } else if (callback) {
-//     callback();
-//   }
-// }
-
 // 尋找 HTML 的所有連結，並將 URL 中包含特定參數的部分刪除
 function processLinks() {
   if (!paramPattern) {
@@ -51,12 +37,14 @@ function processLinks() {
       let url = new URL(link.href); // 嘗試構造 URL
       let params = new URLSearchParams(url.search);
       let modified = false;
+      const removedKeys = []; // 記錄刪除的 Query Key
 
       // 收集所有參數的 key 逐一刪除
       const keys = Array.from(params.keys());
       keys.forEach(param => {
         if (paramPattern.test(param)) {
           params.delete(param);
+          removedKeys.push(param); // 記錄刪除的 Key
           modified = true;
         }
       });
@@ -73,7 +61,8 @@ function processLinks() {
         processedLinks.push({
           original: originalUrl,
           modified: link.href,
-          text: linkText
+          text: linkText,
+          removedKeys: removedKeys.join(', ') // 保存刪除的 Query Key
         });
 
         modifiedCount++; // 增加更改計數
@@ -86,11 +75,9 @@ function processLinks() {
   saveState();
 
   // 更新擴充套件圖示上的 badge
-  // console.log("URL Parameter Eraser: Modified links count:", modifiedCount);
   chrome.runtime.sendMessage({ action: 'updateBadge', count: modifiedCount });
 
   // 傳遞處理後的連結
-  // console.log("URL Parameter Eraser: Processed links:", processedLinks);
   chrome.runtime.sendMessage({ action: 'updateProcessedLinks', links: processedLinks });
 }
 
@@ -141,11 +128,9 @@ function observeDOMChanges() {
 // 初始化
 chrome.runtime.sendMessage({ action: 'getTabId' }, (response) => {
   tabId = response.tabId;
-  // restoreState(() => {
-    initParamPattern(() => {
-      cleanCurrentPageURL();
-      processLinks();
-      observeDOMChanges();
-    });
-  // });
+  initParamPattern(() => {
+    cleanCurrentPageURL();
+    processLinks();
+    observeDOMChanges();
+  });
 });
