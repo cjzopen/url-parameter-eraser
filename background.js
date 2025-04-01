@@ -35,11 +35,43 @@ chrome.runtime.onMessage.addListener((message, sender, sendResponse) => {
   return true; // 表示此處有異步回應
 });
 
+// 清理所有與分頁相關的存儲項
+function cleanUpTabStorage() {
+  chrome.storage.local.get(null, (items) => {
+    const keysToRemove = Object.keys(items).filter(key => key.startsWith('tab_'));
+    chrome.storage.local.remove(keysToRemove, () => {
+      if (chrome.runtime.lastError) {
+        console.error("Failed to clean up tab storage:", chrome.runtime.lastError.message);
+      } else {
+        console.log("Cleaned up tab storage:", keysToRemove);
+      }
+    });
+  });
+}
+
+// 當擴充套件啟動時清空 extension storage Local
+chrome.runtime.onStartup.addListener(() => {
+  // console.log("Extension started. Cleaning up storage...");
+  cleanUpTabStorage();
+});
+
+// 當擴充套件安裝或更新時清空 extension storage Local
+chrome.runtime.onInstalled.addListener(() => {
+  // console.log("Extension installed or updated. Cleaning up storage...");
+  cleanUpTabStorage();
+});
+
 // 當分頁被移除時，刪除對應的記錄
 chrome.tabs.onRemoved.addListener(tabId => {
   delete tabModifiedCounts[tabId];
   delete tabProcessedLinks[tabId];
-  chrome.storage.local.remove(`tab_${tabId}`);
+  chrome.storage.local.remove(`tab_${tabId}`, () => {
+    if (chrome.runtime.lastError) {
+      console.error(`Failed to remove storage for tab_${tabId}:`, chrome.runtime.lastError.message);
+    } else {
+      console.log(`Removed storage for tab_${tabId}`);
+    }
+  });
 });
 
 // 當分頁切換時，更新 Badge
@@ -60,4 +92,16 @@ chrome.runtime.onMessage.addListener((message, sender, sendResponse) => {
   } else if (message.action === 'getTabId') {
     sendResponse({ tabId: sender.tab.id });
   }
+});
+
+// 當 Chrome 關閉時，清空 extension storage Local
+chrome.runtime.onSuspend.addListener(() => {
+  cleanUpTabStorage(); // 清理所有與分頁相關的存儲項
+  chrome.storage.local.clear(() => {
+    if (chrome.runtime.lastError) {
+      console.error("Failed to clear storage:", chrome.runtime.lastError.message);
+    } else {
+      console.log("Extension storage cleared on Chrome close.");
+    }
+  });
 });
