@@ -49,15 +49,14 @@ function cleanUpTabStorage() {
   });
 }
 
+// 因為直接關閉 chrome 不會刪除對應的分頁記錄
 // 當擴充套件啟動時清空 extension storage Local
 chrome.runtime.onStartup.addListener(() => {
-  // console.log("Extension started. Cleaning up storage...");
   cleanUpTabStorage();
 });
 
 // 當擴充套件安裝或更新時清空 extension storage Local
 chrome.runtime.onInstalled.addListener(() => {
-  // console.log("Extension installed or updated. Cleaning up storage...");
   cleanUpTabStorage();
 });
 
@@ -94,14 +93,14 @@ chrome.runtime.onMessage.addListener((message, sender, sendResponse) => {
   }
 });
 
-// 當 Chrome 關閉時，清空 extension storage Local
-chrome.runtime.onSuspend.addListener(() => {
-  cleanUpTabStorage(); // 清理所有與分頁相關的存儲項
-  chrome.storage.local.clear(() => {
-    if (chrome.runtime.lastError) {
-      console.error("Failed to clear storage:", chrome.runtime.lastError.message);
-    } else {
-      console.log("Extension storage cleared on Chrome close.");
-    }
-  });
-});
+// 當 Chrome 關閉時，清空 extension storage Local (not working)
+// chrome.runtime.onSuspend.addListener(() => {
+//   cleanUpTabStorage();
+//   chrome.storage.local.clear(() => {
+//     if (chrome.runtime.lastError) {
+//       console.error("Failed to clear storage:", chrome.runtime.lastError.message);
+//     } else {
+//       console.log("Extension storage cleared on Chrome close.");
+//     }
+//   });
+// });
