@@ -13,18 +13,33 @@
 const tabModifiedCounts = {}; // 用於記錄每個分頁的 modifiedCount
 const tabProcessedLinks = {}; // 用於記錄每個分頁的處理後連結
 
+// 更新 Badge 的顏色和文字
+function updateBadge(tabId, count, isDisabled) {
+  const badgeText = count > 99 ? '99+' : count > 0 ? count.toString() : '';
+  const badgeColor = isDisabled ? '#51f096' : '#ff2453'; // 禁用時為綠色，啟用時為紅色
+
+  chrome.action.setBadgeText({ text: badgeText, tabId });
+  chrome.action.setBadgeBackgroundColor({ color: badgeColor, tabId });
+}
+
 chrome.runtime.onMessage.addListener((message, sender, sendResponse) => {
   if (message.action === 'updateBadge') {
     const tabId = sender.tab.id;
     const count = message.count;
 
-    // 更新記錄
-    tabModifiedCounts[tabId] = count;
+    chrome.tabs.get(tabId, (tab) => {
+      if (tab && tab.url) {
+        const url = new URL(tab.url);
+        const domain = url.hostname;
 
-    // 更新 Badge
-    const badgeText = count > 99 ? '99+' : count > 0 ? count.toString() : '';
-    chrome.action.setBadgeText({ text: badgeText, tabId });
-    chrome.action.setBadgeBackgroundColor({ color: '#ff2453', tabId });
+        chrome.storage.local.get(['disabledDomains'], (data) => {
+          const disabledDomains = data.disabledDomains || [];
+          const isDisabled = disabledDomains.includes(domain);
+          tabModifiedCounts[tabId] = count; // 更新記錄
+          updateBadge(tabId, count, isDisabled); // 更新 Badge
+        });
+      }
+    });
 
     sendResponse({ success: true }); // 回應訊息以保持連接
   } else if (message.action === 'updateProcessedLinks') {
@@ -78,9 +93,18 @@ chrome.tabs.onActivated.addListener(activeInfo => {
   const tabId = activeInfo.tabId;
   const count = tabModifiedCounts[tabId] || 0;
 
-  const badgeText = count > 99 ? '99+' : count > 0 ? count.toString() : '';
-  chrome.action.setBadgeText({ text: badgeText, tabId });
-  chrome.action.setBadgeBackgroundColor({ color: '#ff2453', tabId });
+  chrome.tabs.get(tabId, (tab) => {
+    if (tab && tab.url) {
+      const url = new URL(tab.url);
+      const domain = url.hostname;
+
+      chrome.storage.local.get(['disabledDomains'], (data) => {
+        const disabledDomains = data.disabledDomains || [];
+        const isDisabled = disabledDomains.includes(domain);
+        updateBadge(tabId, count, isDisabled);
+      });
+    }
+  });
 });
 
 // 提供 API 給 popup.html 獲取處理後的連結
@@ -92,15 +116,3 @@ chrome.runtime.onMessage.addListener((message, sender, sendResponse) => {
     sendResponse({ tabId: sender.tab.id });
   }
 });
-
-// 當 Chrome 關閉時，清空 extension storage Local (not working)
-// chrome.runtime.onSuspend.addListener(() => {
-//   cleanUpTabStorage();
-//   chrome.storage.local.clear(() => {
-//     if (chrome.runtime.lastError) {
-//       console.error("Failed to clear storage:", chrome.runtime.lastError.message);
-//     } else {
-//       console.log("Extension storage cleared on Chrome close.");
-//     }
-//   });
-// });

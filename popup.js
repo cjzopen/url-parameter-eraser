@@ -2,6 +2,7 @@ document.addEventListener('DOMContentLoaded', function() {
   const optionsButton = document.querySelector('#options');
   const infoButton = document.querySelector('#info');
   const processedLinksContainer = document.querySelector('#processedLinks');
+  const toggleDomainButton = document.querySelector('#toggleDomain');
 
   if (optionsButton) {
     optionsButton.addEventListener('click', function() {
@@ -18,6 +19,44 @@ document.addEventListener('DOMContentLoaded', function() {
   } else {
     console.error("info button not found!");
   }
+
+  // 獲取當前分頁的網域
+  chrome.tabs.query({ active: true, currentWindow: true }, function(tabs) {
+    const url = new URL(tabs[0].url);
+    const domain = url.hostname;
+
+    // 檢查該網域是否已禁用 observeDOMChanges()
+    chrome.storage.local.get(['disabledDomains'], function(data) {
+      const disabledDomains = data.disabledDomains || [];
+      const isDisabled = disabledDomains.includes(domain);
+
+      const enableText = chrome.i18n.getMessage('enableDynamicMonitoring');
+      const disableText = chrome.i18n.getMessage('disableDynamicMonitoring');
+
+      toggleDomainButton.textContent = isDisabled ? enableText : disableText;
+      toggleDomainButton.style.backgroundColor = isDisabled ? '#4CAF50' : '#ff2453';
+
+      toggleDomainButton.addEventListener('click', function() {
+        if (isDisabled) {
+          // 啟用該網域
+          const updatedDomains = disabledDomains.filter(d => d !== domain);
+          chrome.storage.local.set({ disabledDomains: updatedDomains }, function() {
+            console.log(`Enabled observeDOMChanges() for ${domain}`);
+            toggleDomainButton.textContent = disableText;
+            toggleDomainButton.style.backgroundColor = '#ff2453';
+          });
+        } else {
+          // 禁用該網域
+          disabledDomains.push(domain);
+          chrome.storage.local.set({ disabledDomains }, function() {
+            console.log(`Disabled observeDOMChanges() for ${domain}`);
+            toggleDomainButton.textContent = enableText;
+            toggleDomainButton.style.backgroundColor = '#4CAF50';
+          });
+        }
+      });
+    });
+  });
 
   // 獲取當前分頁的處理後連結
   chrome.tabs.query({ active: true, currentWindow: true }, function(tabs) {
@@ -36,24 +75,12 @@ document.addEventListener('DOMContentLoaded', function() {
           const textSpan = document.createElement('span');
           textSpan.textContent = `Text: ${link.text || '(No text)'}`;
 
-          // const originalSpan = document.createElement('span');
-          // originalSpan.textContent = `Original: ${link.original}`;
-          // originalSpan.setAttribute('title', link.original);
-
-          // const modifiedSpan = document.createElement('span');
-          // modifiedSpan.textContent = `Modified: ${link.modified}`;
-          // modifiedSpan.setAttribute('title', link.modified);
-
           const removedKeysSpan = document.createElement('span');
           removedKeysSpan.textContent = `Removed Keys: ${link.removedKeys || '(None)'}`;
           removedKeysSpan.setAttribute('title', link.removedKeys);
 
           p.appendChild(textSpan);
           p.appendChild(document.createElement('br'));
-          // p.appendChild(originalSpan);
-          // p.appendChild(document.createElement('br'));
-          // p.appendChild(modifiedSpan);
-          // p.appendChild(document.createElement('br'));
           p.appendChild(removedKeysSpan);
 
           details.appendChild(p);

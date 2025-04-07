@@ -15,6 +15,7 @@ document.addEventListener('DOMContentLoaded', () => {
       document.querySelector('#infoPrivacyTitle').textContent = chrome.i18n.getMessage('infoPrivacyTitle');
       document.querySelector('#infoPrivacyDescription').textContent = chrome.i18n.getMessage('infoPrivacyDescription');
       document.querySelector('#infoContact').textContent = chrome.i18n.getMessage('infoContact');
+      document.querySelector('#funcDescription').textContent = chrome.i18n.getMessage('funcDescription');
     },
     options: () => {
       document.title = chrome.i18n.getMessage('optionsTitle');

@@ -19,7 +19,47 @@ function initParamPattern(callback) {
 // 按分頁 ID 將數據保存到 storage
 function saveState() {
   if (tabId !== null && modifiedCount >= 1) {
-    chrome.storage.local.set({ [`tab_${tabId}`]: { modifiedCount, processedLinks } });
+    const dataToSave = {
+      modifiedCount: modifiedCount,
+      processedLinks: Array.isArray(processedLinks) ? processedLinks : [] // 確保 processedLinks 是數組
+    };
+    chrome.storage.local.set({ [`tab_${tabId}`]: dataToSave }, () => {
+      if (chrome.runtime.lastError) {
+        console.error("Failed to save state to storage:", chrome.runtime.lastError.message);
+      } else {
+        // console.log(`State saved for tab_${tabId}:`, dataToSave);
+      }
+    });
+  }
+}
+
+// 更新擴充套件圖示上的 badge
+function updateBadge(count) {
+  try {
+    chrome.runtime.sendMessage({ action: 'updateBadge', count }, response => {
+      if (chrome.runtime.lastError) {
+        console.error("Failed to send message to background:", chrome.runtime.lastError.message);
+      } else if (!response || !response.success) {
+        console.warn("Background script did not acknowledge the message.");
+      }
+    });
+  } catch (error) {
+    console.error("Error sending message to background:", error);
+  }
+}
+
+// 傳遞處理後的連結
+function sendProcessedLinks(links) {
+  try {
+    chrome.runtime.sendMessage({ action: 'updateProcessedLinks', links }, response => {
+      if (chrome.runtime.lastError) {
+        console.error("Failed to send processed links to background:", chrome.runtime.lastError.message);
+      } else if (!response || !response.success) {
+        console.warn("Background script did not acknowledge the processed links.");
+      }
+    });
+  } catch (error) {
+    console.error("Error sending processed links to background:", error);
   }
 }
 
@@ -44,7 +84,9 @@ function processLinks() {
       keys.forEach(param => {
         if (paramPattern.test(param)) {
           params.delete(param);
-          removedKeys.push(param); // 記錄刪除的 Key
+          if (param) {
+            removedKeys.push(param); // 確保 param 有值後再添加
+          }
           modified = true;
         }
       });
@@ -61,8 +103,8 @@ function processLinks() {
         processedLinks.push({
           original: originalUrl,
           modified: link.href,
-          text: linkText,
-          removedKeys: removedKeys.join(', ') // 保存刪除的 Query Key
+          text: linkText || '(No text)',
+          removedKeys: removedKeys.length > 0 ? removedKeys.join(', ') : '(None)'
         });
 
         modifiedCount++; // 增加更改計數
@@ -75,10 +117,10 @@ function processLinks() {
   saveState();
 
   // 更新擴充套件圖示上的 badge
-  chrome.runtime.sendMessage({ action: 'updateBadge', count: modifiedCount });
+  updateBadge(modifiedCount);
 
   // 傳遞處理後的連結
-  chrome.runtime.sendMessage({ action: 'updateProcessedLinks', links: processedLinks });
+  sendProcessedLinks(processedLinks);
 }
 
 // 清除當前頁面 URL 中特定的參數
@@ -128,9 +170,26 @@ function observeDOMChanges() {
 // 初始化
 chrome.runtime.sendMessage({ action: 'getTabId' }, (response) => {
   tabId = response.tabId;
-  initParamPattern(() => {
-    cleanCurrentPageURL();
-    processLinks();
-    observeDOMChanges();
+
+  chrome.storage.local.get(['disabledDomains'], function(data) {
+    const disabledDomains = data.disabledDomains || [];
+    const url = new URL(window.location.href);
+    const domain = url.hostname;
+
+    if (disabledDomains.includes(domain)) {
+      // console.log(`observeDOMChanges() is disabled for ${domain}`);
+      initParamPattern(() => {
+        cleanCurrentPageURL();
+        processLinks();
+      });
+      return;
+    }
+
+    // 如果未禁用，啟用 observeDOMChanges()
+    initParamPattern(() => {
+      cleanCurrentPageURL();
+      processLinks();
+      observeDOMChanges();
+    });
   });
 });

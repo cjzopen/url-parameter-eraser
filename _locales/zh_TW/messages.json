@@ -32,6 +32,9 @@
   "infoDescription": {
     "message": "URL Parameter Eraser 會把當前頁面網址的追蹤碼刪除。除此之外，還會把當前頁面含有追蹤碼的網址改寫，並加上紫色的 dash outline。"
   },
+  "funcDescription": {
+    "message": "你可以點擊 icon 後呼叫操作介面，介面中的「設定」可以自訂你想要過濾掉或取消過濾的追蹤碼。你也可以點擊「在此網域停用動態監控」讓 URL Parameter Eraser 不在該網頁監控網頁內容的變更，釋放一些效能。"
+  },
   "infoPrivacyTitle": {
     "message": "隱私"
   },
@@ -40,5 +43,11 @@
   },
   "infoContact": {
     "message": "如果您有任何疑問，請寄信至 2012cjz@gmail.com。"
+  },
+  "enableDynamicMonitoring": {
+    "message": "在此網域啟用動態監控"
+  },
+  "disableDynamicMonitoring": {
+    "message": "在此網域停用動態監控"
   }
 }
