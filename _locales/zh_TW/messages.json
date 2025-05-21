@@ -1,9 +1,9 @@
 {
   "extensionName": {
-    "message": "URL Parameter Eraser BETA"
+    "message": "URL Parameter Eraser"
   },
   "extensionDescription": {
-    "message": "THIS EXTENSION IS FOR BETA TESTING。移除網址中的追蹤參數，保護您的隱私。"
+    "message": "移除網頁連結中的追蹤參數，保護您的隱私。"
   },
   "optionsTitle": {
     "message": "設定"
@@ -39,7 +39,7 @@
     "message": "隱私"
   },
   "infoPrivacyDescription": {
-    "message": "此擴充功能不會收集或儲存使用者的瀏覽紀錄或其他個人資訊。"
+    "message": "此擴充功能不會收集或儲存使用者的瀏覽紀錄或其他個人資訊，也沒有導入任何第三方程式，所有的設定都儲存在使用者的本機瀏覽器中。"
   },
   "infoContact": {
     "message": "如果您有任何疑問，請寄信至 2012cjz@gmail.com。"

@@ -1,9 +1,9 @@
 {
   "extensionName": {
-    "message": "URL Parameter Eraser BETA"
+    "message": "URL Parameter Eraser"
   },
   "extensionDescription": {
-    "message": "THIS EXTENSION IS FOR BETA TESTING. Reclaim Your Digital Footprint: Erase Tracking Parameters from Your URLs."
+    "message": "Reclaim Your Digital Footprint: Erase Tracking Parameters from Your Webpages."
   },
   "optionsTitle": {
     "message": "Settings"
@@ -39,7 +39,7 @@
     "message": "Privacy"
   },
   "infoPrivacyDescription": {
-    "message": "This extension does not collect or store your browsing history or any personal information."
+    "message": "This extension does not collect or store user browse history or other personal information. It also doesn't incorporate any third-party programs, and all settings are saved in the user's local browser."
   },
   "infoContact": {
     "message": "If you have any questions, please email 2012cjz@gmail.com."

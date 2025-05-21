@@ -1,0 +1,53 @@
+{
+  "extensionName": {
+    "message": "URL Parameter Eraser"
+  },
+  "extensionDescription": {
+    "message": "デジタルフットプリントを守る：URLからトラッキングパラメータを削除します。"
+  },
+  "optionsTitle": {
+    "message": "設定"
+  },
+  "optionsAddLabel": {
+    "message": "カスタムパラメータを追加："
+  },
+  "optionsAddButton": {
+    "message": "追加"
+  },
+  "optionsExistingParams": {
+    "message": "既存のパラメータ"
+  },
+  "popupTitle": {
+    "message": "URL Parameter Eraser"
+  },
+  "popupOptionsButton": {
+    "message": "設定"
+  },
+  "popupInfoButton": {
+    "message": "說明"
+  },
+  "infoTitle": {
+    "message": "紹介"
+  },
+  "infoDescription": {
+    "message": "URL Parameter Eraserは現在のページURLからトラッキングパラメータを削除します。また、トラッキングパラメータを含むリンクを書き換え、紫色の点線アウトラインを追加します。"
+  },
+  "funcDescription": {
+    "message": "アイコンをクリックして操作画面を開くことができます。画面内の「設定」では、フィルタリングまたは除外したいトラッキングパラメータをカスタマイズできます。「このドメインの監視を無効にする」をクリックすると、このページでの監視を停止し、パフォーマンスを向上させます。"
+  },
+  "infoPrivacyTitle": {
+    "message": "プライバシー"
+  },
+  "infoPrivacyDescription": {
+    "message": "この拡張機能は、ユーザーの閲覧履歴やその他の個人情報を収集・保存しません。また、いかなる第三者プログラムも導入しておらず、すべての設定はユーザーのローカルブラウザに保存されます。"
+  },
+  "infoContact": {
+    "message": "ご質問がある場合は、2012cjz@gmail.com までご連絡ください。"
+  },
+  "enableDynamicMonitoring": {
+    "message": "このドメインの監視を有効にする"
+  },
+  "disableDynamicMonitoring": {
+    "message": "このドメインの監視を無効にする"
+  }
+}
