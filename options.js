@@ -2,6 +2,10 @@ document.addEventListener('DOMContentLoaded', function() {
   const customParamsInput = document.getElementById('customParams');
   const addButton = document.getElementById('add');
   const paramsList = document.getElementById('paramsList');
+  const outlineColorPicker = document.getElementById('outlineColorPicker');
+  const outlineAlphaRange = document.getElementById('outlineAlpha');
+  const enableOutlineCheckbox = document.getElementById('enableOutline');
+  const outlineDemo = document.getElementById('outlineDemo');
 
   // 限制輸入內容並進行正則表達式轉義
   customParamsInput.addEventListener('input', function() {
@@ -65,4 +69,78 @@ document.addEventListener('DOMContentLoaded', function() {
       });
     });
   }
+
+  // 更新外框預覽
+  function updateOutlineDemo() {
+    // 直接用目前 input 的值，不用預設值 fallback
+    const hex = outlineColorPicker.value;
+    const alpha = outlineAlphaRange.value;
+    const disableOutline = enableOutlineCheckbox.checked;
+    function hexToRgb(hex) {
+      hex = hex.replace('#', '');
+      if (hex.length === 3) hex = hex.split('').map(x => x + x).join('');
+      const num = parseInt(hex, 16);
+      return [num >> 16, (num >> 8) & 0xff, num & 0xff];
+    }
+    const [r, g, b] = hexToRgb(hex);
+    const rgba = `rgba(${r}, ${g}, ${b}, ${alpha})`;
+    if (!disableOutline) {
+      outlineDemo.style.outline = '1px dashed';
+      outlineDemo.style.outlineColor = rgba;
+    } else {
+      outlineDemo.style.outline = '';
+      outlineDemo.style.outlineColor = '';
+    }
+  }
+
+  // 載入 outline 設定
+  chrome.storage.local.get(['outlineColorHex', 'outlineAlpha', 'disableOutline'], function(data) {
+    console.log(data.outlineColorHex);
+    if (data.outlineColorHex) outlineColorPicker.value = data.outlineColorHex;
+    if (data.outlineAlpha) outlineAlphaRange.value = data.outlineAlpha;
+    if (typeof data.disableOutline === 'boolean') enableOutlineCheckbox.checked = data.disableOutline;
+    updateOutlineDemo();
+  });
+
+  function saveOutlineSettings() {
+    const hex = outlineColorPicker.value;
+    const alpha = outlineAlphaRange.value;
+    const disableOutline = enableOutlineCheckbox.checked;
+    // 預設值
+    const defaultHex = '#cb0fff';
+    const defaultAlpha = '0.2';
+    const defaultDisable = false;
+    const toRemove = [];
+    const toSet = {};
+    if (hex === defaultHex) {
+      toRemove.push('outlineColorHex');
+    } else {
+      toSet.outlineColorHex = hex;
+    }
+    if (alpha === defaultAlpha) {
+      toRemove.push('outlineAlpha');
+    } else {
+      toSet.outlineAlpha = alpha;
+    }
+    if (disableOutline === defaultDisable) {
+      toRemove.push('disableOutline');
+    } else {
+      toSet.disableOutline = disableOutline;
+    }
+    if (toRemove.length) chrome.storage.local.remove(toRemove);
+    if (Object.keys(toSet).length) chrome.storage.local.set(toSet);
+  }
+
+  outlineColorPicker.addEventListener('input', function() {
+    saveOutlineSettings();
+    updateOutlineDemo();
+  });
+  outlineAlphaRange.addEventListener('input', function() {
+    saveOutlineSettings();
+    updateOutlineDemo();
+  });
+  enableOutlineCheckbox.addEventListener('change', function() {
+    saveOutlineSettings();
+    updateOutlineDemo();
+  });
 });

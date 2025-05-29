@@ -22,7 +22,8 @@ document.addEventListener('DOMContentLoaded', () => {
       document.querySelector('h1').textContent = chrome.i18n.getMessage('optionsTitle');
       document.querySelector('label[for="customParams"]').textContent = chrome.i18n.getMessage('optionsAddLabel');
       document.querySelector('#add').textContent = chrome.i18n.getMessage('optionsAddButton');
-      document.querySelector('h2').textContent = chrome.i18n.getMessage('optionsExistingParams');
+      document.querySelector('#existingParamsTitle').textContent = chrome.i18n.getMessage('optionsExistingParams');
+      document.querySelector('#styleTitle').textContent = chrome.i18n.getMessage('optionsStyleTitle');
     }
   };
 

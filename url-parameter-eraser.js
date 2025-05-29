@@ -63,64 +63,101 @@ function sendProcessedLinks(links) {
   }
 }
 
+// 有些 URL encode 後會變成 percent-encoded，例如?會變成 %3F，這樣的 URL 需要先 decode 再處理
+function decodeIfEncoded(href) {
+  // 僅當 href 含有 %3F（不分大小寫）時才 decode，否則直接回傳原 href
+  if (/%3F/i.test(href)) {
+    try {
+      const decoded = decodeURIComponent(href);
+      new URL(decoded); // 驗證 decode 後是合法 URL
+      return decoded;
+    } catch (e2) {
+      return null;
+    }
+  }
+  return href;
+}
+
 // 尋找 HTML 的所有連結，並將 URL 中包含特定參數的部分刪除
 function processLinks() {
   if (!paramPattern) {
     return;
   }
-
-  const links = document.querySelectorAll('a');
-
-  links.forEach(link => {
+  chrome.storage.local.get(['outlineColorHex', 'outlineAlpha', 'disableOutline'], function(styleData) {
+    // context 失效時 styleData 可能為 undefined/null
+    if (!styleData || typeof styleData !== 'object') return;
     try {
-      if (!link.href) return; // 檢查 href 是否存在
-      let url = new URL(link.href); // 嘗試構造 URL
-      let params = new URLSearchParams(url.search);
-      let modified = false;
-      const removedKeys = []; // 記錄刪除的 Query Key
+      const hex = typeof styleData.outlineColorHex === 'string' ? styleData.outlineColorHex : '#cb0fff';
+      const alpha = typeof styleData.outlineAlpha === 'string' || typeof styleData.outlineAlpha === 'number' ? parseFloat(styleData.outlineAlpha) : 0.2;
+      const disableOutline = typeof styleData.disableOutline === 'boolean' ? styleData.disableOutline : false;
+      // 轉換hex為rgb
+      function hexToRgb(hex) {
+        hex = hex.replace('#', '');
+        if (hex.length === 3) hex = hex.split('').map(x => x + x).join('');
+        const num = parseInt(hex, 16);
+        return [num >> 16, (num >> 8) & 0xff, num & 0xff];
+      }
+      const [r, g, b] = hexToRgb(hex);
+      const rgba = `rgba(${r}, ${g}, ${b}, ${alpha})`;
 
-      // 收集所有參數的 key 逐一刪除
-      const keys = Array.from(params.keys());
-      keys.forEach(param => {
-        if (paramPattern.test(param)) {
-          params.delete(param);
-          if (param) {
-            removedKeys.push(param); // 確保 param 有值後再添加
+      const links = document.querySelectorAll('a');
+
+      links.forEach(link => {
+        try {
+          if (!link.href) return;
+          const decodedHref = decodeIfEncoded(link.href);
+          if (!decodedHref) return;
+          let url = new URL(decodedHref);
+          let params = new URLSearchParams(url.search);
+          let modified = false;
+          const removedKeys = [];
+          const keys = Array.from(params.keys());
+          keys.forEach(param => {
+            if (paramPattern.test(param) || paramPattern.test(decodeURIComponent(param))) {
+              params.delete(param);
+              if (param) {
+                removedKeys.push(param);
+              }
+              modified = true;
+            }
+          });
+          if (modified) {
+            const originalUrl = link.href;
+            url.search = params.toString();
+            // 若原始 href 為 percent-encoded，需重新 encode
+            if (link.href !== url.toString() && /%[0-9a-fA-F]{2}/.test(link.href)) {
+              link.href = encodeURI(url.toString());
+            } else {
+              link.href = url.toString();
+            }
+            if (!disableOutline) {
+              link.style.outline = '1px dashed';
+              link.style.outlineColor = rgba;
+            } else {
+              link.style.outline = '';
+              link.style.outlineColor = '';
+            }
+            const linkText = link.textContent.trim().substring(0, 32);
+            processedLinks.push({
+              original: originalUrl,
+              modified: link.href,
+              text: linkText || '(No text)',
+              removedKeys: removedKeys.length > 0 ? removedKeys.join(', ') : '(None)'
+            });
+            modifiedCount++;
           }
-          modified = true;
+        } catch (error) {
+          console.warn("Skipping invalid URL:", link.href, error);
         }
       });
-
-      if (modified) {
-        const originalUrl = link.href; // 保存原始連結
-        url.search = params.toString();
-        link.href = url.toString();
-        link.style.outline = '1px dashed rgba(203, 15, 255, 0.2)';
-
-        // 提取連結文字，限制最多 32 個字，並移除多餘的空白
-        const linkText = link.textContent.trim().substring(0, 32);
-
-        processedLinks.push({
-          original: originalUrl,
-          modified: link.href,
-          text: linkText || '(No text)',
-          removedKeys: removedKeys.length > 0 ? removedKeys.join(', ') : '(None)'
-        });
-
-        modifiedCount++; // 增加更改計數
-      }
-    } catch (error) {
-      console.warn("Skipping invalid URL:", link.href, error);
+      saveState();
+      updateBadge(modifiedCount);
+      sendProcessedLinks(processedLinks);
+    } catch (e) {
+      // context 失效或其他錯誤時直接忽略
+      return;
     }
   });
-
-  saveState();
-
-  // 更新擴充套件圖示上的 badge
-  updateBadge(modifiedCount);
-
-  // 傳遞處理後的連結
-  sendProcessedLinks(processedLinks);
 }
 
 // 清除當前頁面 URL 中特定的參數
@@ -171,13 +208,22 @@ function observeDOMChanges() {
 chrome.runtime.sendMessage({ action: 'getTabId' }, (response) => {
   tabId = response.tabId;
 
-  chrome.storage.local.get(['disabledDomains'], function(data) {
+  chrome.storage.local.get(['disabledDomains', 'disabledProcessingDomains'], function(data) {
     const disabledDomains = data.disabledDomains || [];
+    const disabledProcessingDomains = data.disabledProcessingDomains || [];
     const url = new URL(window.location.href);
     const domain = url.hostname;
 
+    if (disabledProcessingDomains.includes(domain)) {
+      // 完全停用 processLinks 和 observeDOMChanges
+      initParamPattern(() => {
+        cleanCurrentPageURL();
+      });
+      return;
+    }
+
     if (disabledDomains.includes(domain)) {
-      // console.log(`observeDOMChanges() is disabled for ${domain}`);
+      // 只停用 observeDOMChanges
       initParamPattern(() => {
         cleanCurrentPageURL();
         processLinks();

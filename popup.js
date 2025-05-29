@@ -3,6 +3,7 @@ document.addEventListener('DOMContentLoaded', function() {
   const infoButton = document.querySelector('#info');
   const processedLinksContainer = document.querySelector('#processedLinks');
   const toggleDomainButton = document.querySelector('#toggleDomain');
+  const disableProcessingButton = document.querySelector('#disableProcessing');
 
   if (optionsButton) {
     optionsButton.addEventListener('click', function() {
@@ -55,6 +56,37 @@ document.addEventListener('DOMContentLoaded', function() {
           });
         }
       });
+    });
+
+    // 新增 disableProcessing 按鈕功能
+    chrome.storage.local.get(['disabledProcessingDomains'], function(data) {
+      const disabledProcessingDomains = data.disabledProcessingDomains || [];
+      const isProcessingDisabled = disabledProcessingDomains.includes(domain);
+      const disableProcessingText = chrome.i18n.getMessage('disableProcessing');
+      const enableProcessingText = chrome.i18n.getMessage('enableProcessing');
+      if (disableProcessingButton) {
+        disableProcessingButton.textContent = isProcessingDisabled ? enableProcessingText : disableProcessingText;
+        disableProcessingButton.style.backgroundColor = isProcessingDisabled ? '#4CAF50' : '#ff2453';
+        disableProcessingButton.onclick = function() {
+          if (isProcessingDisabled) {
+            // 啟用 processLinks/observeDOMChanges
+            const updated = disabledProcessingDomains.filter(d => d !== domain);
+            chrome.storage.local.set({ disabledProcessingDomains: updated }, function() {
+              disableProcessingButton.textContent = disableProcessingText;
+              disableProcessingButton.style.backgroundColor = '#ff2453';
+              chrome.tabs.reload(tabs[0].id);
+            });
+          } else {
+            // 停用 processLinks/observeDOMChanges
+            disabledProcessingDomains.push(domain);
+            chrome.storage.local.set({ disabledProcessingDomains }, function() {
+              disableProcessingButton.textContent = enableProcessingText;
+              disableProcessingButton.style.backgroundColor = '#4CAF50';
+              chrome.tabs.reload(tabs[0].id);
+            });
+          }
+        };
+      }
     });
   });
 

@@ -17,6 +17,9 @@
   "optionsExistingParams": {
     "message": "Existing Parameters"
   },
+  "optionsStyleTitle": {
+    "message": "Link Style Settings"
+  },
   "popupTitle": {
     "message": "URL Parameter Eraser"
   },
@@ -33,7 +36,7 @@
     "message": "URL Parameter Eraser removes tracking parameters from the current page URL. It also rewrites links containing tracking parameters and adds a purple dashed outline."
   },
   "funcDescription": {
-    "message": "You can click the icon to open the interface. In the interface, the 'Settings' option allows you to customize which tracking parameters to filter or unfilter. You can also click 'Disable dynamic monitoring for this domain' to stop URL Parameter Eraser from monitoring changes on this page, freeing up some performance."
+    "message": "You can click the icon to open the interface. In the interface, the 'Settings' option allows you to customize which tracking parameters to filter or unfilter, and also set the style for filtered links. You can also click 'Disable dynamic monitoring for this domain' to stop URL Parameter Eraser from monitoring changes on this page, freeing up some performance. Furthermore, you can click 'Disable link processing for this domain' to stop URL Parameter Eraser from processing any links on this domain."
   },
   "infoPrivacyTitle": {
     "message": "Privacy"
@@ -49,5 +52,11 @@
   },
   "disableDynamicMonitoring": {
     "message": "Disable dynamic monitoring for this domain"
+  },
+  "disableProcessing": {
+    "message": "Disable link processing for this domain"
+  },
+  "enableProcessing": {
+    "message": "Enable link processing for this domain"
   }
 }
