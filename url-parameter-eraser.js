@@ -124,9 +124,27 @@ function processLinks() {
           if (modified) {
             const originalUrl = link.href;
             url.search = params.toString();
-            // 若原始 href 為 percent-encoded，需重新 encode
-            if (link.href !== url.toString() && /%[0-9a-fA-F]{2}/.test(link.href)) {
-              link.href = encodeURI(url.toString());
+            // 若原始 href 為 percent-encoded，需還原 encode 狀態（只 encode非 ASCII 部分，避免 query value 亂碼）
+            if (/%[0-9a-fA-F]{2}/.test(originalUrl)) {
+              // 只 encode path/search/hash，且保留 query value 的原始編碼
+              let encodedPath = encodeURI(url.pathname);
+              // 針對 search，保留 = 後的 value 原始編碼
+              let encodedSearch = '';
+              if (url.search) {
+                const searchParams = [];
+                url.searchParams.forEach((v, k) => {
+                  // 取原始 query string
+                  const match = originalUrl.match(new RegExp('[?&]' + k + '=([^&#]*)'));
+                  if (match) {
+                    searchParams.push(k + '=' + match[1]);
+                  } else {
+                    searchParams.push(k + '=' + encodeURIComponent(v));
+                  }
+                });
+                encodedSearch = '?' + searchParams.join('&');
+              }
+              let encodedHash = url.hash ? encodeURI(url.hash) : '';
+              link.href = url.origin + encodedPath + encodedSearch + encodedHash;
             } else {
               link.href = url.toString();
             }
