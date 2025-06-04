@@ -2,8 +2,6 @@ document.addEventListener('DOMContentLoaded', function() {
   const optionsButton = document.querySelector('#options');
   const infoButton = document.querySelector('#info');
   const processedLinksContainer = document.querySelector('#processedLinks');
-  const toggleDomainButton = document.querySelector('#toggleDomain');
-  const disableProcessingButton = document.querySelector('#disableProcessing');
 
   if (optionsButton) {
     optionsButton.addEventListener('click', function() {
@@ -26,67 +24,40 @@ document.addEventListener('DOMContentLoaded', function() {
     const url = new URL(tabs[0].url);
     const domain = url.hostname;
 
-    // 檢查該網域是否已禁用 observeDOMChanges()
+    // 改成 checkbox 狀態變化，取代舊的 toggleDomain/disableProcessing 按鈕
+    // 動態監控
+    const dynamicInput = document.getElementById('dynamic-monitoring-input');
     chrome.storage.local.get(['disabledDomains'], function(data) {
       const disabledDomains = data.disabledDomains || [];
-      const isDisabled = disabledDomains.includes(domain);
-
-      const enableText = chrome.i18n.getMessage('enableDynamicMonitoring');
-      const disableText = chrome.i18n.getMessage('disableDynamicMonitoring');
-
-      toggleDomainButton.textContent = isDisabled ? enableText : disableText;
-      toggleDomainButton.style.backgroundColor = isDisabled ? '#4CAF50' : '#ff2453';
-
-      toggleDomainButton.addEventListener('click', function() {
-        if (isDisabled) {
-          // 啟用該網域
-          const updatedDomains = disabledDomains.filter(d => d !== domain);
-          chrome.storage.local.set({ disabledDomains: updatedDomains }, function() {
-            console.log(`Enabled observeDOMChanges() for ${domain}`);
-            toggleDomainButton.textContent = disableText;
-            toggleDomainButton.style.backgroundColor = '#ff2453';
-          });
+      dynamicInput.checked = disabledDomains.includes(domain); // checked = 停用
+      dynamicInput.onchange = function() {
+        if (dynamicInput.checked) {
+          // 停用動態監控
+          if (!disabledDomains.includes(domain)) disabledDomains.push(domain);
+          chrome.storage.local.set({ disabledDomains });
         } else {
-          // 禁用該網域
-          disabledDomains.push(domain);
-          chrome.storage.local.set({ disabledDomains }, function() {
-            console.log(`Disabled observeDOMChanges() for ${domain}`);
-            toggleDomainButton.textContent = enableText;
-            toggleDomainButton.style.backgroundColor = '#4CAF50';
-          });
+          // 啟用動態監控
+          const updated = disabledDomains.filter(d => d !== domain);
+          chrome.storage.local.set({ disabledDomains: updated });
         }
-      });
+      };
     });
-
-    // 新增 disableProcessing 按鈕功能
+    // 所有功能
+    const allFuncInput = document.getElementById('allfunction-input');
     chrome.storage.local.get(['disabledProcessingDomains'], function(data) {
       const disabledProcessingDomains = data.disabledProcessingDomains || [];
-      const isProcessingDisabled = disabledProcessingDomains.includes(domain);
-      const disableProcessingText = chrome.i18n.getMessage('disableProcessing');
-      const enableProcessingText = chrome.i18n.getMessage('enableProcessing');
-      if (disableProcessingButton) {
-        disableProcessingButton.textContent = isProcessingDisabled ? enableProcessingText : disableProcessingText;
-        disableProcessingButton.style.backgroundColor = isProcessingDisabled ? '#4CAF50' : '#ff2453';
-        disableProcessingButton.onclick = function() {
-          if (isProcessingDisabled) {
-            // 啟用 processLinks/observeDOMChanges
-            const updated = disabledProcessingDomains.filter(d => d !== domain);
-            chrome.storage.local.set({ disabledProcessingDomains: updated }, function() {
-              disableProcessingButton.textContent = disableProcessingText;
-              disableProcessingButton.style.backgroundColor = '#ff2453';
-              chrome.tabs.reload(tabs[0].id);
-            });
-          } else {
-            // 停用 processLinks/observeDOMChanges
-            disabledProcessingDomains.push(domain);
-            chrome.storage.local.set({ disabledProcessingDomains }, function() {
-              disableProcessingButton.textContent = enableProcessingText;
-              disableProcessingButton.style.backgroundColor = '#4CAF50';
-              chrome.tabs.reload(tabs[0].id);
-            });
-          }
-        };
-      }
+      allFuncInput.checked = disabledProcessingDomains.includes(domain); // checked = 停用
+      allFuncInput.onchange = function() {
+        if (allFuncInput.checked) {
+          // 停用所有功能
+          if (!disabledProcessingDomains.includes(domain)) disabledProcessingDomains.push(domain);
+          chrome.storage.local.set({ disabledProcessingDomains });
+        } else {
+          // 啟用所有功能
+          const updated = disabledProcessingDomains.filter(d => d !== domain);
+          chrome.storage.local.set({ disabledProcessingDomains: updated });
+        }
+      };
     });
   });
 

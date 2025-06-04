@@ -7,6 +7,8 @@ document.addEventListener('DOMContentLoaded', () => {
       document.querySelector('#popupTitle').textContent = chrome.i18n.getMessage('popupTitle');
       document.querySelector('#options').textContent = chrome.i18n.getMessage('popupOptionsButton');
       document.querySelector('#info').textContent = chrome.i18n.getMessage('popupInfoButton');
+      document.querySelector('#dynamic-monitoring-text').textContent = chrome.i18n.getMessage('dynamicMonitoringCheckbox');
+      document.querySelector('#allfunction-text').textContent = chrome.i18n.getMessage('allFunctionCheckbox');
     },
     info: () => {
       document.title = chrome.i18n.getMessage('infoTitle');

@@ -8,6 +8,16 @@
 </head>
 <body data-page="popup">
 <style>
+:root {
+  --main-color: #345;
+  --main-color-hover: #678;
+  --white-color: #f5ebc4;
+  --gap: .5rem;
+  --transition-duration: .3s;
+}
+*,*::before,*::after {
+  box-sizing: border-box;
+}
 body {
   font-family: Arial, sans-serif;
   font-size: 16px;
@@ -27,16 +37,77 @@ button {
   -webkit-appearance: none;
   font-size: 16px;
   padding: 8px 16px;
-  margin: 8px;
+  margin: var(--gap);
   border: none;
   border-radius: 4px;
   background-color: #345;
-  color: #f5ebc4;
+  color: var(--white-color);
   cursor: pointer;
-  transition: all .3s ease;
+  transition: all var(--transition-duration) ease;
   &:active {
     transform: scale(0.95);
-    transition: all .3s ease;
+    transition: all var(--transition-duration) ease;
+  }
+}
+
+@scope (.checkbox-wrapper) {
+  --height: 2rem;
+  --deg: 12deg;
+  display: flex;
+  justify-content: flex-end;
+  align-items: center;
+  margin: var(--gap) 0;
+  gap: var(--gap);
+
+  .checkbox-input {
+    display: none;
+  }
+  .checkbox-btn {
+    display: block;
+    position: relative;
+    width: 4rem;
+    height: var(--height);
+    background-color: #ff2453;
+    flex-shrink: 0;
+    text-align: center;
+    font-weight: bold;
+    transform: skew(calc(var(--deg) * -1));
+    outline: 0;
+    cursor: pointer;
+    -webkit-user-select: none;
+    user-select: none;
+    overflow: hidden;
+    -webkit-backface-visibility: hidden;
+    backface-visibility: hidden;
+    transition: all var(--transition-duration) ease;
+  }
+  .checkbox-btn::before,
+  .checkbox-btn::after {
+    display: inline-block;
+    position: absolute;
+    width: 100%;
+    color: var(--white-color);
+    text-shadow: 0 1px 0 rgba(10, 10, 10, .4);
+    transform: skew(var(--deg));
+    line-height: var(--height);
+    transition: all var(--transition-duration) ease;
+  }
+  .checkbox-btn::before {
+    content: attr(data-default);
+    left: 0;
+  }
+  .checkbox-btn::after {
+    content: attr(data-active);
+    left: 100%;
+  }
+  .checkbox-input:checked ~ .checkbox-btn {
+    background-color: #4CAF50;
+  }
+  .checkbox-input:checked ~ .checkbox-btn::before {
+    left: -100%;
+  }
+  .checkbox-input:checked ~ .checkbox-btn::after {
+    left: 0;
   }
 }
 #processedLinks {
@@ -64,11 +135,15 @@ details summary {
   <p id="popupTitle">__MSG_popupTitle__</p>
   <button id="options">__MSG_popupOptionsButton__</button>
   <button id="info">__MSG_popupInfoButton__</button>
-  <div>
-    <button id="toggleDomain">在此網域停用動態監控</button>
+  <div class="checkbox-wrapper">
+    <input class="checkbox-input" id="dynamic-monitoring-input" type="checkbox" />
+    <span id="dynamic-monitoring-text">此網域的動態監控</span>
+    <label class="checkbox-btn" data-default="ON" data-active="OFF" for="dynamic-monitoring-input"></label>
   </div>
-  <div>
-    <button id="disableProcessing">在此網域停用連結處理</button>
+  <div class="checkbox-wrapper">
+    <input class="checkbox-input" id="allfunction-input" type="checkbox" />
+    <span id="allfunction-text">此網域的所有功能</span>
+    <label class="checkbox-btn" data-default="ON" data-active="OFF" for="allfunction-input"></label>
   </div>
   <div id="processedLinks"></div>
 </body>
