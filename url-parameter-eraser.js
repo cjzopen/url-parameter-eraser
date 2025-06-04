@@ -83,7 +83,11 @@ function processLinks() {
   if (!paramPattern) {
     return;
   }
-  chrome.storage.local.get(['outlineColorHex', 'outlineAlpha', 'disableOutline'], function(styleData) {
+  chrome.storage.local.get({
+    'outlineColorHex': '#cb0fff',
+    'outlineAlpha': 0.2,
+    'disableOutline': false
+  }, function(styleData) {
     // context 失效時 styleData 可能為 undefined/null
     if (!styleData || typeof styleData !== 'object') return;
     try {
