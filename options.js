@@ -21,6 +21,10 @@ document.addEventListener('DOMContentLoaded', function() {
 
   // 將文字轉義為正則表達式安全的格式
   function escapeRegex(input) {
+    if (input.startsWith('^')) {
+      // 保留開頭的 ^，其餘部分才跳脫
+      return '^' + input.slice(1).replace(/[.*+?^${}()|[\]\\]/g, '\\$&');
+    }
     return input.replace(/[.*+?^${}()|[\]\\]/g, '\\$&');
   }
 

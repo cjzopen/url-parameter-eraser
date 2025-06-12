@@ -3,7 +3,9 @@ window.defaultParams = [
   'mc_', 'mkt_tok', 'fbclid', 'yclid', '_openstat', 'wicked', 'jobsource', 'xmt',
   'otc', 'oly_', 'rb_clickid', 'soc_', 'cvid', 'oicd', 'vgo_ee',
   'srsltid', 'gs_lcrp', 'gclid', 'gad_source', 'sxsrf', 'sca_esv',
-  'ref_src', 'ref_url'
+  '^ref_', '\\$deep_link', '\\$3p', 'correlation_id', 'post_fullname',
+  '_branch_match_id', '_branch_referrer',
+  'trk', 'mcid', 'upsellOrderOrigin', 'referenceId'
 ];
 
 // 從 storage 中獲取參數
