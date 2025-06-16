@@ -5,7 +5,9 @@ window.defaultParams = [
   'srsltid', 'gs_lcrp', 'gclid', 'gad_source', 'sxsrf', 'sca_esv',
   '^ref_', '\\$deep_link', '\\$3p', 'correlation_id', 'post_fullname',
   '_branch_match_id', '_branch_referrer',
-  'trk', 'mcid', 'upsellOrderOrigin', 'referenceId'
+  'trk', 'mcid', 'upsellOrderOrigin', 'referenceId', 'miniProfileUrn', 'lipi', 'trkEmail', 'midSig', 'midToken', 'otpToken',
+  'msclkid', 'rlid', 'fr2',
+  '^attr_', '_source_', 'is_from_webapp', 'sender_device'
 ];
 
 // 從 storage 中獲取參數

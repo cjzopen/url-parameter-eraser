@@ -63,10 +63,11 @@ function sendProcessedLinks(links) {
   }
 }
 
-// 有些 URL encode 後會變成 percent-encoded，例如?會變成 %3F，這樣的 URL 需要先 decode 再處理
+// 有些 URL percent-encoded，例如?會變成 %3F，這樣的 URL 需要先 decode 再處理
 function decodeIfEncoded(href) {
-  // 僅當 href 含有 %3F（不分大小寫）時才 decode，否則直接回傳原 href
-  if (/%3F/i.test(href)) {
+  // Adjust the URL-encoding interpretation logic.
+  // 僅當 href 含有 ? = & 的 encode 時才 decode，否則直接回傳原 href
+  if (/%3F|%3D|%26/i.test(href)) {
     try {
       const decoded = decodeURIComponent(href);
       new URL(decoded); // 驗證 decode 後是合法 URL
@@ -205,7 +206,7 @@ function cleanCurrentPageURL() {
     if (modified) {
       url.search = params.toString();
       history.replaceState(null, '', url.toString());
-      // console.log("URL Parameter Eraser: Cleaned current page URL:", url.toString());
+      // console.log(url.toString());
     }
   } catch (error) {
     console.warn("Failed to clean current page URL:", error);
@@ -222,8 +223,6 @@ function observeDOMChanges() {
     childList: true, // 監聽子節點的變化
     subtree: true    // 監聽整個子樹
   });
-
-  // console.log("URL Parameter Eraser: MutationObserver started.");
 }
 
 // 初始化
