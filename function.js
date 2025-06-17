@@ -1,9 +1,9 @@
 window.defaultParams = [
-  '^utm_', '^stm_', '_gl', '_ga', 'clid', '^__hs', '^_hs', 'hsa_', 'icid', 'igshid',
-  'mc_', 'mkt_tok', 'fbclid', 'yclid', '_openstat', 'wicked', 'jobsource', 'xmt',
-  'otc', 'oly_', 'rb_clickid', 'soc_', 'cvid', 'oicd', 'vgo_ee',
+  '^utm_', '^stm_', '_gl', '_ga', '^__hs', '^_hs', '^hsa_', 'icid', 'igshid',
+  '^mc_', 'mkt_tok', 'fbclid', 'yclid', '_openstat', 'wicked', 'jobsource', 'xmt',
+  'otc', '^oly_', 'rb_clickid', '^soc_', 'cvid', 'oicd', 'vgo_ee',
   'srsltid', 'gs_lcrp', 'gclid', 'gad_source', 'sxsrf', 'sca_esv',
-  '^ref_', '\\$deep_link', '\\$3p', 'correlation_id', 'post_fullname',
+  '^ref_', '\$deep_link', '\$3p', 'correlation_id', 'post_fullname',
   '_branch_match_id', '_branch_referrer',
   'trk', 'mcid', 'upsellOrderOrigin', 'referenceId', 'miniProfileUrn', 'lipi', 'trkEmail', 'midSig', 'midToken', 'otpToken',
   'msclkid', 'rlid', 'fr2',

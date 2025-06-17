@@ -36,7 +36,7 @@
     "message": "URL Parameter Eraser removes tracking parameters from the current page URL. It also rewrites links containing tracking parameters and adds a purple dashed outline."
   },
   "funcDescription": {
-    "message": "You can click the icon to open the interface. In the interface, the 'Settings' option allows you to customize which tracking parameters to filter or unfilter, and also set the style for filtered links. You can also disable dynamic monitoring to stop URL Parameter Eraser from monitoring changes on this page, freeing up some performance. Furthermore, you can disable all features to stop URL Parameter Eraser from processing any links on this domain."
+    "message": "You can click the icon to open the interface. In the interface, the 'Settings' option allows you to customize which tracking parameters to filter or unfilter. Currently, exact match (case-insensitive) and ^ prefix filtering are supported (e.g., entering ^utm will filter utm_source, utm_campaign, etc.). You can also set the style for filtered links. You can disable dynamic monitoring to stop URL Parameter Eraser from monitoring changes on this page, freeing up some performance. Furthermore, you can disable all features to stop URL Parameter Eraser from processing any links on this domain."
   },
   "infoPrivacyTitle": {
     "message": "Privacy"

@@ -36,7 +36,7 @@
     "message": "URL Parameter Eraser 會把當前頁面網址的追蹤碼刪除。除此之外，還會把當前頁面含有追蹤碼的網址改寫，並加上紫色的 dash outline。"
   },
   "funcDescription": {
-    "message": "你可以點擊 icon 後呼叫操作介面，介面中的「設定」可以自訂你想要過濾掉或取消過濾的追蹤碼, 也能設定被過濾後的連結之樣式。你也可以停用動態監控讓 URL Parameter Eraser 不在該網頁監控網頁內容的變更，釋放一些效能。更甚者，你可以停用所有功能讓 URL Parameter Eraser 不在該網域處理任何連結。"
+    "message": "你可以點擊 icon 後呼叫操作介面，介面中的「設定」可以自訂你想要過濾掉或取消過濾的追蹤碼，目前支援完全相同（不分大小寫）或以 ^ 開頭的篩選（例如輸入 ^utm 可同時過濾 utm_source、utm_campaign 等參數。）。也能設定被過濾後的連結之樣式。你也可以停用動態監控讓 URL Parameter Eraser 不在該網頁監控網頁內容的變更，釋放一些效能。更甚者，你可以停用所有功能讓 URL Parameter Eraser 不在該網域處理任何連結。"
   },
   "infoPrivacyTitle": {
     "message": "隱私"

@@ -3,12 +3,23 @@ let modifiedCount = 0; // 記錄更改的連結數量
 let processedLinks = []; // 記錄處理的連結
 let tabId = null; // 當前分頁的 ID
 
-// 初始化 paramPattern
+// 將字串轉為正規表達式可用的格式
+function escapeRegex(input) {
+  if (input.startsWith('^')) {
+    // 允許使用 ^ 比對
+    return '^' + input.slice(1).replace(/[.*+?^${}()|[\]\\]/g, '\\$&');
+  }
+  // 其餘完全比對（^(跳脫param)$）
+  return '^' + input.replace(/[.*+?^${}()|[\]\\]/g, '\\$&') + '$';
+}
+
+// 初始化 paramPattern，正規表達式自動忽略大小寫
 function initParamPattern(callback) {
   getStoredParams(['url_parameter_eraser_params', 'defaultParams'], function(data) {
     const defaultParams = Array.isArray(data.defaultParams) ? data.defaultParams : window.defaultParams;
     const customParams = data.url_parameter_eraser_params || [];
-    const allParams = [...new Set([...defaultParams, ...customParams])];
+    // defaultParams 跟 customParams 都 escape，組合正則
+    const allParams = [...new Set([...defaultParams, ...customParams])].map(escapeRegex);
     paramPattern = new RegExp(allParams.join('|'), 'i');
     // console.log("Initialized paramPattern:", paramPattern);
 
@@ -65,7 +76,6 @@ function sendProcessedLinks(links) {
 
 // 有些 URL percent-encoded，例如?會變成 %3F，這樣的 URL 需要先 decode 再處理
 function decodeIfEncoded(href) {
-  // Adjust the URL-encoding interpretation logic.
   // 僅當 href 含有 ? = & 的 encode 時才 decode，否則直接回傳原 href
   if (/%3F|%3D|%26/i.test(href)) {
     try {
