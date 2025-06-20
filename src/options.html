@@ -39,10 +39,11 @@ button, input[type="text"] {
   background: none;
   font-size: inherit;
 }
-#customParams {
+input[type="text"].underline-input {
   padding: 8px;
   margin: 8px 0;
   border-bottom: 1px solid var(--main-color);
+  width: 240px;
 }
 #add {
   padding: 8px 16px;
@@ -129,8 +130,12 @@ button, input[type="text"] {
   <h1>__MSG_optionsTitle__</h1>
   <div>
     <label for="customParams">__MSG_optionsAddLabel__</label>
-    <input type="text" id="customParams" placeholder="e.g., utm_source">
+    <input type="text" class="underline-input" id="customParams" placeholder="e.g., utm_source">
     <button id="add">__MSG_optionsAddButton__</button>
+  </div>
+  <div>
+    <label for="customParamsNote">Note (optional)：</label>
+    <input type="text" class="underline-input" id="customParamsNote" placeholder="Why this parameter was added">
   </div>
   <h2 id="existingParamsTitle">__MSG_optionsExistingParams__</h2>
   <ul id="paramsList"></ul>

@@ -10,3 +10,6 @@ thumbs.db
 
 node_modules
 npm-debug.log
+
+dist
+popup copy.js

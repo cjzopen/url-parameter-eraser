@@ -1,5 +1,6 @@
 document.addEventListener('DOMContentLoaded', function() {
   const customParamsInput = document.getElementById('customParams');
+  const customParamsNoteInput = document.getElementById('customParamsNote');
   const addButton = document.getElementById('add');
   const paramsList = document.getElementById('paramsList');
   const outlineColorPicker = document.getElementById('outlineColorPicker');
@@ -34,21 +35,44 @@ document.addEventListener('DOMContentLoaded', function() {
   // 儲存自訂參數
   addButton.addEventListener('click', function() {
     let customParams = customParamsInput.value.split(',').map(param => escapeRegex(param.trim())).filter(param => param);
-
+    let note = customParamsNoteInput.value.trim();
+    if (!customParams.length) return;
     getStoredParams(['url_parameter_eraser_params'], function(data) {
-      const existingParams = Array.isArray(data.url_parameter_eraser_params) ? data.url_parameter_eraser_params : [];
-      const updatedParams = [...new Set([...existingParams, ...customParams])];
-      saveParams('url_parameter_eraser_params', updatedParams, function() {
-        console.log("Custom parameters saved:", updatedParams);
-        updateParamsList(paramsList, defaultParams, updatedParams, deleteDefaultParam, deleteCustomParam);
-        customParamsInput.value = ''; // 清空輸入框
+      let existingParams = Array.isArray(data.url_parameter_eraser_params) ? data.url_parameter_eraser_params : [];
+      // 兼容舊格式（字串）自動轉換為物件格式，補 domain
+      existingParams = existingParams.map(p => {
+        if (typeof p === 'string') return {param: p, note: '', domain: ''};
+        if (!('domain' in p)) p.domain = '';
+        return p;
+      });
+      // 新增每個 param 都帶 note, domain
+      customParams.forEach(param => {
+        const idx = existingParams.findIndex(p => p.param === param);
+        if (idx !== -1) {
+          existingParams[idx].note = note;
+          existingParams[idx].domain = '';
+        } else {
+          existingParams.push({param, note, domain: ''});
+        }
+      });
+      saveParams('url_parameter_eraser_params', existingParams, function() {
+        console.log("Custom parameters saved:", existingParams);
+        updateParamsList(paramsList, defaultParams, existingParams, deleteDefaultParam, deleteCustomParam);
+        customParamsInput.value = '';
+        customParamsNoteInput.value = '';
       });
     });
   });
 
   // 加載已保存的設置
   getStoredParams(['url_parameter_eraser_params', 'defaultParams'], function(data) {
-    const customParams = Array.isArray(data.url_parameter_eraser_params) ? data.url_parameter_eraser_params : [];
+    let customParams = Array.isArray(data.url_parameter_eraser_params) ? data.url_parameter_eraser_params : [];
+    // 兼容舊格式，補 domain
+    customParams = customParams.map(p => {
+      if (typeof p === 'string') return {param: p, note: '', domain: ''};
+      if (!('domain' in p)) p.domain = '';
+      return p;
+    });
     updateParamsList(paramsList, defaultParams, customParams, deleteDefaultParam, deleteCustomParam);
   });
 
@@ -65,8 +89,14 @@ document.addEventListener('DOMContentLoaded', function() {
   // 刪除 customParams 中的參數
   function deleteCustomParam(paramToDelete) {
     getStoredParams(['url_parameter_eraser_params'], function(data) {
-      const customParams = Array.isArray(data.url_parameter_eraser_params) ? data.url_parameter_eraser_params : [];
-      const updatedParams = customParams.filter(param => param !== paramToDelete);
+      let customParams = Array.isArray(data.url_parameter_eraser_params) ? data.url_parameter_eraser_params : [];
+      // 兼容舊格式，補 domain
+      customParams = customParams.map(p => {
+        if (typeof p === 'string') return {param: p, note: '', domain: ''};
+        if (!('domain' in p)) p.domain = '';
+        return p;
+      });
+      const updatedParams = customParams.filter(p => p.param !== paramToDelete);
       saveParams('url_parameter_eraser_params', updatedParams, function() {
         console.log("Custom parameter deleted:", paramToDelete);
         updateParamsList(paramsList, defaultParams, updatedParams, deleteDefaultParam, deleteCustomParam);
