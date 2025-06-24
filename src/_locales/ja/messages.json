@@ -52,5 +52,20 @@
   },
   "allFunctionCheckbox": {
     "message": "このドメインでリンク処理"
+  },
+  "optionsNoteLabel": {
+    "message": "備考（任意、現在機能はありません）："
+  },
+  "optionsDomainLabel": {
+    "message": "ドメイン（任意、現在機能はありません）："
+  },
+  "optionsNotePlaceholder": {
+    "message": "このパラメータを追加する理由"
+  },
+  "optionsDomainPlaceholder": {
+    "message": "例: google.com、空欄は全て"
+  },
+  "optionsTempMessage": {
+    "message": "⚠️📢 現在のバージョンではカスタムパラメータの形式と保存方法が変更され、今後のアップデートに備えています。保存場所は引き続きあなたのローカルブラウザですが、ブラウザの同期機能を有効にしていれば、カスタムパラメータを複数端末で利用できます。"
   }
 }

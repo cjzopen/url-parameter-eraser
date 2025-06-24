@@ -1,13 +1,65 @@
 window.defaultParams = [
-  '^utm_', '^stm_', '_gl', '_ga', '^__hs', '^_hs', '^hsa_', 'icid', 'igshid', 'ocid',
-  '^mc_', 'mkt_tok', 'fbclid', 'yclid', '_openstat', 'wicked', 'jobsource', 'xmt',
-  'otc', '^oly_', 'rb_clickid', '^soc_', 'cvid', 'oicd', 'vgo_ee',
-  'srsltid', 'gs_lcrp', 'gclid', 'gad_source', 'gad_campaignid', 'gbraid', 'sxsrf', 'sca_esv',
-  '^ref_', '\$deep_link', '\$3p', 'correlation_id', 'post_fullname',
-  '_branch_match_id', '_branch_referrer',
-  'trk', 'mcid', 'upsellOrderOrigin', 'referenceId', 'miniProfileUrn', 'lipi', 'trkEmail', 'midSig', 'midToken', 'otpToken',
-  'msclkid', 'rlid', 'fr2', 'refId', 'trackingId',
-  '^attr_', '_source_', 'is_from_webapp', 'sender_device'
+  { param: '^utm_', note: '', domain: '' },
+  { param: '^stm_', note: '', domain: '' },
+  { param: '_gl', note: 'Google Analytics', domain: '' },
+  { param: '_ga', note: 'Google Analytics', domain: '' },
+  { param: '^__hs', note: 'hubspot', domain: '' },
+  { param: '^_hs', note: 'hubspot', domain: '' },
+  { param: '^hsa_', note: 'hubspot', domain: '' },
+  { param: 'icid', note: '', domain: '' },
+  { param: 'igshid', note: '', domain: '' },
+  { param: 'ocid', note: '', domain: '' },
+  { param: '^mc_', note: '', domain: '' },
+  { param: 'mkt_tok', note: '', domain: '' },
+  { param: 'fbclid', note: 'facebook', domain: '' },
+  { param: 'yclid', note: '', domain: '' },
+  { param: '_openstat', note: '', domain: '' },
+  { param: 'wicked', note: '', domain: '' },
+  { param: 'jobsource', note: '104', domain: '' },
+  { param: 'xmt', note: 'Threads', domain: '' },
+  { param: 'otc', note: '', domain: '' },
+  { param: '^oly_', note: '', domain: '' },
+  { param: 'rb_clickid', note: '', domain: '' },
+  { param: '^soc_', note: '', domain: '' },
+  { param: 'cvid', note: '', domain: '' },
+  { param: 'oicd', note: '', domain: '' },
+  { param: 'vgo_ee', note: '', domain: '' },
+  { param: 'gs_lcrp', note: '', domain: '' },
+  { param: 'gclid', note: 'google ads', domain: '' },
+  { param: 'gad_source', note: 'google ads', domain: '' },
+  { param: 'gad_campaignid', note: 'google ads', domain: '' },
+  { param: 'gbraid', note: 'google ads', domain: '' },
+  { param: 'trackingId', note: '', domain: '' },
+  { param: 'srsltid', note: 'google merchant center', domain: '' },
+  { param: 'sxsrf', note: 'google search', domain: '' },
+  { param: 'gs_ssp', note: 'google search', domain: '' },
+  { param: 'sca_esv', note: 'google search', domain: '' },
+  { param: '^ref_', note: 'twitter, google', domain: '' },
+  { param: '$deep_link', note: 'reddit', domain: '' },
+  { param: '$3p', note: 'reddit', domain: '' },
+  { param: 'correlation_id', note: 'reddit', domain: '' },
+  { param: 'post_fullname', note: 'reddit', domain: '' },
+  { param: '_branch_match_id', note: '', domain: '' },
+  { param: '_branch_referrer', note: '', domain: '' },
+  { param: 'trk', note: 'linkedin', domain: '' },
+  { param: 'mcid', note: '', domain: '' },
+  { param: 'upsellOrderOrigin', note: 'linkedin', domain: '' },
+  { param: 'referenceId', note: 'linkedin', domain: '' },
+  { param: 'miniProfileUrn', note: 'linkedin', domain: '' },
+  { param: 'lipi', note: 'linkedin', domain: '' },
+  { param: 'trkEmail', note: 'linkedin', domain: '' },
+  { param: 'midSig', note: 'linkedin', domain: '' },
+  { param: 'midToken', note: 'linkedin', domain: '' },
+  { param: 'otpToken', note: 'linkedin', domain: '' },
+  { param: 'msclkid', note: '', domain: '' },
+  { param: 'rlid', note: '', domain: '' },
+  { param: 'fr2', note: 'bing or yahoo', domain: '' },
+  { param: 'refId', note: 'bing or yahoo', domain: '' },
+  { param: '^attr_', note: 'bing or yahoo', domain: '' },
+  { param: '_source_', note: '', domain: '' },
+  { param: 'is_from_webapp', note: '', domain: '' },
+  { param: 'sender_device', note: '', domain: '' },
+  { param: 'gs_lp', note: '', domain: '' }
 ];
 
 // 從 storage 中獲取參數
@@ -20,7 +72,7 @@ function saveParams(key, params, callback) {
   chrome.storage.sync.set({ [key]: params }, callback);
 }
 
-// 創建參數列表項（支援 note, domain）
+// 創建參數列表項
 function createParamsListElement(el, paramObj, isDefault, deleteCallback) {
   const li = document.createElement('li');
   let param, note, domain;
@@ -37,18 +89,39 @@ function createParamsListElement(el, paramObj, isDefault, deleteCallback) {
   span.textContent = param;
   li.appendChild(span);
 
-  // title 顯示 note 與 domain
-  let title = note ? note : param;
-  if (domain) title += `\n(domain: ${domain})`;
-  li.title = title;
+  // 建立按鈕區塊
+  const btnDiv = document.createElement('div');
+  btnDiv.id = 'paramsList-button';
+  btnDiv.style.display = 'inline-flex';
+  btnDiv.style.alignItems = 'center';
+
+  // Popover 說明按鈕（僅 note 有值時）
+  // if (note) {
+  //   const infoBtn = document.createElement('button');
+  //   infoBtn.textContent = '❔';
+  //   // popoverId 只允許 _, -, 英文
+  //   const safeParamIdName = param.replace(/[^a-zA-Z_-]/g, '');
+  //   const popoverId = `param-${safeParamIdName}-note`;
+  //   infoBtn.setAttribute('popovertarget', popoverId);
+  //   infoBtn.title = 'infomation';
+  //   btnDiv.appendChild(infoBtn);
+  //   // popover div
+  //   const popDiv = document.createElement('div');
+  //   popDiv.setAttribute('popover', '');
+  //   popDiv.id = popoverId;
+  //   popDiv.textContent = note;
+  //   btnDiv.appendChild(popDiv);
+  // }
+
 
   const deleteButton = document.createElement('button');
   deleteButton.textContent = '✖';
   deleteButton.style.color = '#ff2453';
   deleteButton.title = `DELETE ${param}`;
   deleteButton.addEventListener('click', () => deleteCallback(param));
+  btnDiv.appendChild(deleteButton);
 
-  li.appendChild(deleteButton);
+  li.appendChild(btnDiv);
   return li;
 }
 
@@ -72,4 +145,23 @@ function updateParamsList(paramsListElement, defaultParams, customParams, delete
     const li = createParamsListElement(paramsListElement, paramObj, false, deleteCustomParam);
     paramsListElement.appendChild(li);
   });
+}
+
+// 兼容舊格式 defaultParams：若為字串自動轉換為物件格式
+function normalizeDefaultParams(arr) {
+  return arr.map(p => {
+    if (typeof p === 'string') return { param: p, note: '', domain: '' };
+    if (!('note' in p)) p.note = '';
+    if (!('domain' in p)) p.domain = '';
+    return p;
+  });
+}
+
+// 將文字轉義為正則表達式安全的格式
+function escapeRegex(input) {
+  if (typeof input !== 'string') input = input && input.param ? input.param : '';
+  if (input.startsWith('^')) {
+    return '^' + input.slice(1).replace(/[.*+?^${}()|[\\]\\]/g, '\\$&');
+  }
+  return input.replace(/[.*+?^${}()|[\\]\\]/g, '\\$&');
 }

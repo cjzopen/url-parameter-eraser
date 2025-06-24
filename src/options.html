@@ -73,9 +73,11 @@ input[type="text"].underline-input {
   border-radius: 20px;
   margin: 4px;
 }
-#paramsList li button {
-  cursor: pointer;
-  margin-left: 5px;
+#paramsList-button {
+  margin-left: 1rem;
+  button{
+    cursor: pointer;
+  }
 }
 .outline-demo {
   display: inline-block;
@@ -125,6 +127,29 @@ input[type="text"].underline-input {
   transition: background-color .2s, border-color .2s;
   flex-shrink: 0;
 }
+:popover-open{
+  color: var(--main-color);
+  background-color: var(--white-color);
+  outline:none;
+  border:none;
+  width: min(400px, 80vw);
+  text-align: center;
+  padding:0;
+  border-radius: 4px;
+  box-shadow: 0 0 0 2px var(--main-color);
+  padding: 1rem;
+  opacity: 1;
+  transform: scaleX(1);
+  transition: all .4s ease;
+  text-box: none !important;
+  &::backdrop{
+    background-color: rgba(10, 10, 10, .6);
+  }
+  @starting-style {
+    opacity: 0;
+    transform: scaleX(0);
+  }
+}
 </style>
 <div id="all">
   <h1>__MSG_optionsTitle__</h1>
@@ -133,10 +158,15 @@ input[type="text"].underline-input {
     <input type="text" class="underline-input" id="customParams" placeholder="e.g., utm_source">
     <button id="add">__MSG_optionsAddButton__</button>
   </div>
-  <div>
-    <label for="customParamsNote">Note (optional)：</label>
-    <input type="text" class="underline-input" id="customParamsNote" placeholder="Why this parameter was added">
-  </div>
+  <!-- <div>
+    <label for="customParamsNote">__MSG_optionsNoteLabel__</label>
+    <input type="text" class="underline-input" id="customParamsNote" placeholder="Why add this parameter?">
+  </div> -->
+  <!-- <div>
+    <label for="customParamsDomain">__MSG_optionsDomainLabel__</label>
+    <input type="text" class="underline-input" id="customParamsDomain" placeholder="leave blank for all">
+  </div> -->
+  <!-- <div id="tempMessage">__MSG_optionsTempMessage__</div> -->
   <h2 id="existingParamsTitle">__MSG_optionsExistingParams__</h2>
   <ul id="paramsList"></ul>
   <h2 style="margin-top: 4rem;" id="styleTitle">__MSG_optionsStyleTitle__</h2>

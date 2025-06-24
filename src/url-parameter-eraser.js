@@ -16,10 +16,20 @@ function escapeRegex(input) {
 // 初始化 paramPattern，正規表達式自動忽略大小寫
 function initParamPattern(callback) {
   getStoredParams(['url_parameter_eraser_params', 'defaultParams'], function(data) {
-    const defaultParams = Array.isArray(data.defaultParams) ? data.defaultParams : window.defaultParams;
-    const customParams = data.url_parameter_eraser_params || [];
-    // defaultParams 跟 customParams 都 escape，組合正則
-    const allParams = [...new Set([...defaultParams, ...customParams])].map(escapeRegex);
+    // 先正規化格式
+    const defaultParamsArr = Array.isArray(data.defaultParams) ? data.defaultParams : window.defaultParams;
+    const customParamsArr = Array.isArray(data.url_parameter_eraser_params) ? data.url_parameter_eraser_params : [];
+    // 兼容舊格式
+    const normalize = arr => arr.map(p => {
+      if (typeof p === 'string') return { param: p, note: '', domain: '' };
+      if (!('note' in p)) p.note = '';
+      if (!('domain' in p)) p.domain = '';
+      return p;
+    });
+    const defaultParams = normalize(defaultParamsArr);
+    const customParams = normalize(customParamsArr);
+    // 只取 param 欄位
+    const allParams = [...new Set([...defaultParams, ...customParams].map(p => p.param))].map(escapeRegex);
     paramPattern = new RegExp(allParams.join('|'), 'i');
     // console.log("Initialized paramPattern:", paramPattern);
 

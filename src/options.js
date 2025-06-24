@@ -1,6 +1,7 @@
 document.addEventListener('DOMContentLoaded', function() {
   const customParamsInput = document.getElementById('customParams');
   const customParamsNoteInput = document.getElementById('customParamsNote');
+  const customParamsDomainInput = document.getElementById('customParamsDomain');
   const addButton = document.getElementById('add');
   const paramsList = document.getElementById('paramsList');
   const outlineColorPicker = document.getElementById('outlineColorPicker');
@@ -22,11 +23,12 @@ document.addEventListener('DOMContentLoaded', function() {
 
   // 將文字轉義為正則表達式安全的格式
   function escapeRegex(input) {
+    if (typeof input !== 'string') input = input && input.param ? input.param : '';
     if (input.startsWith('^')) {
       // 保留開頭的 ^，其餘部分才跳脫
-      return '^' + input.slice(1).replace(/[.*+?^${}()|[\]\\]/g, '\\$&');
+      return '^' + input.slice(1).replace(/[.*+?^${}()|[\\]\\]/g, '\\$&');
     }
-    return input.replace(/[.*+?^${}()|[\]\\]/g, '\\$&');
+    return input.replace(/[.*+?^${}()|[\\]\\]/g, '\\$&');
   }
 
   // 從全局變數讀取 defaultParams
@@ -36,6 +38,9 @@ document.addEventListener('DOMContentLoaded', function() {
   addButton.addEventListener('click', function() {
     let customParams = customParamsInput.value.split(',').map(param => escapeRegex(param.trim())).filter(param => param);
     let note = customParamsNoteInput.value.trim();
+    let domain = customParamsDomainInput.value.trim().toLowerCase();
+    // 沒輸入時為空字串
+    if (!domain) domain = '';
     if (!customParams.length) return;
     getStoredParams(['url_parameter_eraser_params'], function(data) {
       let existingParams = Array.isArray(data.url_parameter_eraser_params) ? data.url_parameter_eraser_params : [];
@@ -50,16 +55,20 @@ document.addEventListener('DOMContentLoaded', function() {
         const idx = existingParams.findIndex(p => p.param === param);
         if (idx !== -1) {
           existingParams[idx].note = note;
-          existingParams[idx].domain = '';
+          existingParams[idx].domain = domain;
         } else {
-          existingParams.push({param, note, domain: ''});
+          existingParams.push({param, note, domain});
         }
       });
+      // 同步存到 local 及 sync
       saveParams('url_parameter_eraser_params', existingParams, function() {
-        console.log("Custom parameters saved:", existingParams);
-        updateParamsList(paramsList, defaultParams, existingParams, deleteDefaultParam, deleteCustomParam);
-        customParamsInput.value = '';
-        customParamsNoteInput.value = '';
+        chrome.storage.sync.set({ url_parameter_eraser_params: existingParams }, function() {
+          console.log("Custom parameters saved (local & sync):", existingParams);
+          updateParamsList(paramsList, defaultParams, existingParams, deleteDefaultParam, deleteCustomParam);
+          customParamsInput.value = '';
+          customParamsNoteInput.value = '';
+          customParamsDomainInput.value = '';
+        });
       });
     });
   });
@@ -74,15 +83,32 @@ document.addEventListener('DOMContentLoaded', function() {
       return p;
     });
     updateParamsList(paramsList, defaultParams, customParams, deleteDefaultParam, deleteCustomParam);
+    // 若 local 沒有但 sync 有，則同步回 local
+    if (!data.url_parameter_eraser_params) {
+      chrome.storage.sync.get(['url_parameter_eraser_params'], function(syncData) {
+        if (Array.isArray(syncData.url_parameter_eraser_params)) {
+          chrome.storage.local.set({ url_parameter_eraser_params: syncData.url_parameter_eraser_params });
+        }
+      });
+    }
   });
 
-  // 刪除 defaultParams 中的參數
+  // 刪除 defaultParams 中的參數，並記錄到 defaultParamsCancel
   function deleteDefaultParam(paramToDelete) {
-    defaultParams = defaultParams.filter(param => param !== paramToDelete);
-    window.defaultParams = defaultParams;
-    saveParams('defaultParams', defaultParams, function() {
-      console.log("Default parameter deleted:", paramToDelete);
-      updateParamsList(paramsList, defaultParams, [], deleteDefaultParam, deleteCustomParam);
+    // 取得現有 defaultParamsCancel
+    chrome.storage.sync.get(['defaultParamsCancel'], function(data) {
+      let cancelList = Array.isArray(data.defaultParamsCancel) ? data.defaultParamsCancel : [];
+      // 只記錄 param 字串
+      if (!cancelList.includes(paramToDelete)) cancelList.push(paramToDelete);
+      chrome.storage.sync.set({ defaultParamsCancel: cancelList }, function() {
+        // 過濾 defaultParams 並更新畫面
+        defaultParams = defaultParams.filter(p => (typeof p === 'string' ? p : p.param) !== paramToDelete);
+        window.defaultParams = defaultParams;
+        saveParams('defaultParams', defaultParams, function() {
+          console.log("Default parameter deleted and recorded:", paramToDelete);
+          updateParamsList(paramsList, defaultParams, [], deleteDefaultParam, deleteCustomParam);
+        });
+      });
     });
   }
 
@@ -98,8 +124,10 @@ document.addEventListener('DOMContentLoaded', function() {
       });
       const updatedParams = customParams.filter(p => p.param !== paramToDelete);
       saveParams('url_parameter_eraser_params', updatedParams, function() {
-        console.log("Custom parameter deleted:", paramToDelete);
-        updateParamsList(paramsList, defaultParams, updatedParams, deleteDefaultParam, deleteCustomParam);
+        chrome.storage.sync.set({ url_parameter_eraser_params: updatedParams }, function() {
+          console.log("Custom parameter deleted (local & sync):", paramToDelete);
+          updateParamsList(paramsList, defaultParams, updatedParams, deleteDefaultParam, deleteCustomParam);
+        });
       });
     });
   }

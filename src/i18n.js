@@ -23,9 +23,12 @@ document.addEventListener('DOMContentLoaded', () => {
       document.title = chrome.i18n.getMessage('optionsTitle');
       document.querySelector('h1').textContent = chrome.i18n.getMessage('optionsTitle');
       document.querySelector('label[for="customParams"]').textContent = chrome.i18n.getMessage('optionsAddLabel');
-      document.querySelector('#add').textContent = chrome.i18n.getMessage('optionsAddButton');
-      document.querySelector('#existingParamsTitle').textContent = chrome.i18n.getMessage('optionsExistingParams');
-      document.querySelector('#styleTitle').textContent = chrome.i18n.getMessage('optionsStyleTitle');
+      document.getElementById('add').textContent = chrome.i18n.getMessage('optionsAddButton');
+      // document.querySelector('label[for="customParamsNote"]').textContent = chrome.i18n.getMessage('optionsNoteLabel');
+      // document.querySelector('label[for="customParamsDomain"]').textContent = chrome.i18n.getMessage('optionsDomainLabel');
+      // document.getElementById('tempMessage').textContent = chrome.i18n.getMessage('optionsTempMessage');
+      document.getElementById('existingParamsTitle').textContent = chrome.i18n.getMessage('optionsExistingParams');
+      document.getElementById('styleTitle').textContent = chrome.i18n.getMessage('optionsStyleTitle');
     }
   };
 
@@ -34,4 +37,6 @@ document.addEventListener('DOMContentLoaded', () => {
   } else {
     console.warn(`No i18n handler found for page: ${page}`);
   }
+
+
 });
