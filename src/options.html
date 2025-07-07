@@ -39,6 +39,10 @@ button, input[type="text"] {
   background: none;
   font-size: inherit;
 }
+button {
+  cursor: pointer;
+  user-select: none;
+}
 input[type="text"].underline-input {
   padding: 8px;
   margin: 8px 0;
@@ -63,15 +67,25 @@ input[type="text"].underline-input {
   text-box: trim-both cap alphabetic;
 }
 #paramsList li {
+  --li-padding: 4px;
+  --ui-padding: 12px;
   display: inline-flex;
   justify-content: space-between;
   align-items: center;
-  padding: 8px;
+  padding: calc(var(--li-padding) / 2) var(--li-padding);
   box-shadow: 0 0 0 1px var(--main-color);
   background-color: var(--main-color);
   color: var(--white-color);
   border-radius: 20px;
   margin: 4px;
+  &:has(.paramsListPopover:hover) {
+    opacity: .6;
+  }
+}
+.paramsListPopover {
+  padding: calc(var(--ui-padding) - var(--li-padding));
+  color: var(--white-color);
+  width: 100%;
 }
 #paramsList-button {
   margin-left: 1rem;
@@ -158,14 +172,14 @@ input[type="text"].underline-input {
     <input type="text" class="underline-input" id="customParams" placeholder="e.g., utm_source">
     <button id="add">__MSG_optionsAddButton__</button>
   </div>
-  <!-- <div>
+  <div>
     <label for="customParamsNote">__MSG_optionsNoteLabel__</label>
     <input type="text" class="underline-input" id="customParamsNote" placeholder="Why add this parameter?">
-  </div> -->
-  <!-- <div>
+  </div>
+  <div>
     <label for="customParamsDomain">__MSG_optionsDomainLabel__</label>
     <input type="text" class="underline-input" id="customParamsDomain" placeholder="leave blank for all">
-  </div> -->
+  </div>
   <!-- <div id="tempMessage">__MSG_optionsTempMessage__</div> -->
   <h2 id="existingParamsTitle">__MSG_optionsExistingParams__</h2>
   <ul id="paramsList"></ul>
@@ -186,6 +200,19 @@ input[type="text"].underline-input {
       <span id="outlineDemo" class="outline-demo">color effects preview</span>
     </div>
   </div>
+</div>
+<div style="display:none;">
+  <svg>
+    <symbol id="svg-close-button" viewBox="0 0 512 512" fill="currentColor">
+      <path d="M256 48a208 208 0 1 1 0 416 208 208 0 1 1 0-416zm0 464A256 256 0 1 0 256 0a256 256 0 1 0 0 512zM175 175c-9.4 9.4-9.4 24.6 0 33.9l47 47-47 47c-9.4 9.4-9.4 24.6 0 33.9s24.6 9.4 33.9 0l47-47 47 47c9.4 9.4 24.6 9.4 33.9 0s9.4-24.6 0-33.9l-47-47 47-47c9.4-9.4 9.4-24.6 0-33.9s-24.6-9.4-33.9 0l-47 47-47-47c-9.4-9.4-24.6-9.4-33.9 0z"/>
+    </symbol>
+    <symbol id="svg-delete-button" viewBox="0 0 448 512" fill="currentColor">
+      <path d="M170.5 51.6L151.5 80l145 0-19-28.4c-1.5-2.2-4-3.6-6.7-3.6l-93.7 0c-2.7 0-5.2 1.3-6.7 3.6zm147-26.6L354.2 80 368 80l48 0 8 0c13.3 0 24 10.7 24 24s-10.7 24-24 24l-8 0 0 304c0 44.2-35.8 80-80 80l-224 0c-44.2 0-80-35.8-80-80l0-304-8 0c-13.3 0-24-10.7-24-24S10.7 80 24 80l8 0 48 0 13.8 0 36.7-55.1C140.9 9.4 158.4 0 177.1 0l93.7 0c18.7 0 36.2 9.4 46.6 24.9zM80 128l0 304c0 17.7 14.3 32 32 32l224 0c17.7 0 32-14.3 32-32l0-304L80 128zm80 64l0 208c0 8.8-7.2 16-16 16s-16-7.2-16-16l0-208c0-8.8 7.2-16 16-16s16 7.2 16 16zm80 0l0 208c0 8.8-7.2 16-16 16s-16-7.2-16-16l0-208c0-8.8 7.2-16 16-16s16 7.2 16 16zm80 0l0 208c0 8.8-7.2 16-16 16s-16-7.2-16-16l0-208c0-8.8 7.2-16 16-16s16 7.2 16 16z"/>
+    </symbol>
+    <symbol id="svg-edit-button" viewBox="0 0 512 512" fill="currentColor">
+      <path d="M362.7 19.3L314.3 67.7 444.3 197.7l48.4-48.4c25-25 25-65.5 0-90.5L453.3 19.3c-25-25-65.5-25-90.5 0zm-71 71L58.6 323.5c-10.4 10.4-18 23.3-22.2 37.4L1 481.2C-1.5 489.7 .8 498.8 7 505s15.3 8.5 23.7 6.1l120.3-35.4c14.1-4.2 27-11.8 37.4-22.2L421.7 220.3 291.7 90.3z"/>
+    </symbol>
+  </svg>
 </div>
 </body>
 </html>

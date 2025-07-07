@@ -125,43 +125,53 @@ function createParamsListElement(el, paramObj, isDefault, deleteCallback) {
     note = paramObj.note || '';
     domain = paramObj.domain || '';
   }
-  const span = document.createElement('span');
-  span.textContent = param;
-  li.appendChild(span);
 
-  // 建立按鈕區塊
-  const btnDiv = document.createElement('div');
-  btnDiv.id = 'paramsList-button';
-  btnDiv.style.display = 'inline-flex';
-  btnDiv.style.alignItems = 'center';
+  // popoverId 只允許 _, -, 英文
+  const safeParamIdName = param.replace(/[^a-zA-Z_-]/g, '');
+  const popoverId = `param-${safeParamIdName}`;
 
-  // Popover 說明按鈕（僅 note 有值時）
-  // if (note) {
-  //   const infoBtn = document.createElement('button');
-  //   infoBtn.textContent = '❔';
-  //   // popoverId 只允許 _, -, 英文
-  //   const safeParamIdName = param.replace(/[^a-zA-Z_-]/g, '');
-  //   const popoverId = `param-${safeParamIdName}-note`;
-  //   infoBtn.setAttribute('popovertarget', popoverId);
-  //   infoBtn.title = 'infomation';
-  //   btnDiv.appendChild(infoBtn);
-  //   // popover div
-  //   const popDiv = document.createElement('div');
-  //   popDiv.setAttribute('popover', '');
-  //   popDiv.id = popoverId;
-  //   popDiv.textContent = note;
-  //   btnDiv.appendChild(popDiv);
-  // }
+  // Popover 按鈕
+  const popoverBtn = document.createElement('button');
+  popoverBtn.textContent = param;
+  popoverBtn.setAttribute('popovertarget', popoverId);
+  popoverBtn.classList.add('paramsListPopover');
+  li.appendChild(popoverBtn);
 
+  // Popover 內容
+  const popDiv = document.createElement('div');
+  popDiv.setAttribute('popover', '');
+  popDiv.id = popoverId;
+  const infoDiv = document.createElement('div');
+  infoDiv.style.display = 'flex';
+  infoDiv.style.flexDirection = 'column';
+  infoDiv.style.gap = '8px';
 
+  // Popover 關閉按鈕（SVG）
+  const closeBtn = document.createElement('button');
+  closeBtn.setAttribute('popovertarget', popoverId);
+  closeBtn.type = 'button';
+  closeBtn.style.alignSelf = 'flex-end';
+  closeBtn.style.background = 'none';
+  closeBtn.style.border = 'none';
+  closeBtn.style.cursor = 'pointer';
+  closeBtn.style.padding = '0';
+  // SVG內容
+  closeBtn.innerHTML = '<svg width="24" height="24" viewBox="0 0 512 512" fill="currentColor"><use href="#svg-close-button"></use></svg>';
+  infoDiv.appendChild(closeBtn);
+
+  infoDiv.innerHTML += `<b>${param}</b>`;
+  if (note) infoDiv.innerHTML += `<div>Note: ${note}</div>`;
+  if (domain) infoDiv.innerHTML += `<div>Domain: ${domain}</div>`;
   const deleteButton = document.createElement('button');
-  deleteButton.textContent = '✖';
+  deleteButton.innerHTML = '<svg width="28" height="32" viewBox="0 0 448 512" fill="currentColor"><use href="#svg-delete-button"></use></svg>';
   deleteButton.style.color = '#ff2453';
   deleteButton.title = `DELETE ${param}`;
+  deleteButton.style.marginTop = '60px';
   deleteButton.addEventListener('click', () => deleteCallback(param));
-  btnDiv.appendChild(deleteButton);
+  infoDiv.appendChild(deleteButton);
+  popDiv.appendChild(infoDiv);
+  li.appendChild(popDiv);
 
-  li.appendChild(btnDiv);
   return li;
 }
 
