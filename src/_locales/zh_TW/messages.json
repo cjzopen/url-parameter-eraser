@@ -1,4 +1,4 @@
-{
+{  
   "extensionName": {
     "message": "URL Parameter Eraser"
   },
@@ -11,6 +11,11 @@
   "optionsAddLabel": {
     "message": "新增自訂參數："
   },
+  "optionsNoteLabel": { "message": "筆記（選填）" },
+  "optionsNotePlaceholder": { "message": "為什麼要加入這個參數？" },
+  "optionsDomainLabel": { "message": "適用網域" },
+  "optionsDomainPlaceholder": { "message": "留空代表全部" },
+
   "optionsAddButton": {
     "message": "新增"
   },
@@ -52,12 +57,6 @@
   },
   "allFunctionCheckbox": {
     "message": "此網域的所有功能"
-  },
-  "optionsNoteLabel": {
-    "message": "備註（選填，暫無功能）："
-  },
-  "optionsDomainLabel": {
-    "message": "適用網域（選填，暫無功能）："
   },
   "optionsTempMessage": {
     "message": "⚠️📢目前的版本改寫了自訂參數舊有的格式與儲存方式，以利未來的版本更新。儲存的位置依然在您的本機瀏覽器中，但若有開啟瀏覽器的同步功能，則可以跨裝置套用已自訂的參數。"

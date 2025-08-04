@@ -15,25 +15,29 @@ function escapeRegex(input) {
 
 // 初始化 paramPattern，正規表達式自動忽略大小寫
 function initParamPattern(callback) {
-  getStoredParams(['url_parameter_eraser_params', 'defaultParams'], function(data) {
-    // 先正規化格式
-    const defaultParamsArr = Array.isArray(data.defaultParams) ? data.defaultParams : window.defaultParams;
-    const customParamsArr = Array.isArray(data.url_parameter_eraser_params) ? data.url_parameter_eraser_params : [];
-    // 兼容舊格式
-    const normalize = arr => arr.map(p => {
-      if (typeof p === 'string') return { param: p, note: '', domain: '' };
-      if (!('note' in p)) p.note = '';
-      if (!('domain' in p)) p.domain = '';
-      return p;
-    });
-    const defaultParams = normalize(defaultParamsArr);
-    const customParams = normalize(customParamsArr);
-    // 只取 param 欄位
+  getStoredParams(['url_parameter_eraser_params', 'defaultParams', 'defaultParamsCancel'], function(data) {
+    const defaultParams = Array.isArray(data.defaultParams) ? data.defaultParams : window.defaultParams;
+    const customParams = Array.isArray(data.url_parameter_eraser_params) ? data.url_parameter_eraser_params : [];
+    let cancelArr = Array.isArray(data.defaultParamsCancel) ? data.defaultParamsCancel : [];
+    // 如果 local 沒有，從 sync fallback
+    if (!cancelArr.length && chrome && chrome.storage && chrome.storage.sync) {
+      chrome.storage.sync.get(['defaultParamsCancel'], function(syncData) {
+        cancelArr = Array.isArray(syncData.defaultParamsCancel) ? syncData.defaultParamsCancel : [];
+        window.defaultParamsCancel = cancelArr;
+        const allParams = [...new Set([...defaultParams, ...customParams].map(p => p.param))].map(escapeRegex);
+        console.log('initParamPattern defaultParams:', defaultParams);
+        console.log('initParamPattern defaultParamsCancel:', window.defaultParamsCancel);
+        console.log('initParamPattern allParams:', allParams);
+        paramPattern = new RegExp(allParams.join('|'), 'i');
+        if (callback) callback(window.url_parameter_eraser_params = customParams);
+      });
+      return;
+    } else {
+      window.defaultParamsCancel = cancelArr;
+    }
     const allParams = [...new Set([...defaultParams, ...customParams].map(p => p.param))].map(escapeRegex);
     paramPattern = new RegExp(allParams.join('|'), 'i');
-    // console.log("Initialized paramPattern:", paramPattern);
-
-    if (callback) callback();
+    if (callback) callback(window.url_parameter_eraser_params = customParams);
   });
 }
 
@@ -84,6 +88,28 @@ function sendProcessedLinks(links) {
   }
 }
 
+// 取得 cancel 名單（白名單）
+function getCancelParams() {
+  let cancelParams = [];
+  if (window.defaultParamsCancel) cancelParams = cancelParams.concat(window.defaultParamsCancel);
+  if (window.url_parameter_eraser_params_cancel) cancelParams = cancelParams.concat(window.url_parameter_eraser_params_cancel);
+  return cancelParams;
+}
+
+// 過濾掉 cancel 名單的 defaultParams
+function getFilteredDefaultParams() {
+  const cancelParams = getCancelParams();
+  if (!window.defaultParams) return [];
+  return window.defaultParams.filter(p => {
+    const paramKey = p.param;
+    return !cancelParams.some(cancelObj => {
+      if (!cancelObj) return true;
+      const cancelKey = typeof cancelObj === 'string' ? cancelObj : cancelObj.param;
+      return cancelKey === paramKey;
+    });
+  });
+}
+
 // 有些 URL percent-encoded，例如?會變成 %3F，這樣的 URL 需要先 decode 再處理
 function decodeIfEncoded(href) {
   // 僅當 href 含有 ? = & 的 encode 時才 decode，否則直接回傳原 href
@@ -109,13 +135,11 @@ function processLinks() {
     'outlineAlpha': 0.2,
     'disableOutline': false
   }, function(styleData) {
-    // context 失效時 styleData 可能為 undefined/null
     if (!styleData || typeof styleData !== 'object') return;
     try {
       const hex = typeof styleData.outlineColorHex === 'string' ? styleData.outlineColorHex : '#cb0fff';
       const alpha = typeof styleData.outlineAlpha === 'string' || typeof styleData.outlineAlpha === 'number' ? parseFloat(styleData.outlineAlpha) : 0.2;
       const disableOutline = typeof styleData.disableOutline === 'boolean' ? styleData.disableOutline : false;
-      // 轉換hex為rgb
       function hexToRgb(hex) {
         hex = hex.replace('#', '');
         if (hex.length === 3) hex = hex.split('').map(x => x + x).join('');
@@ -124,41 +148,54 @@ function processLinks() {
       }
       const [r, g, b] = hexToRgb(hex);
       const rgba = `rgba(${r}, ${g}, ${b}, ${alpha})`;
-
       const links = document.querySelectorAll('a');
-
+      let allParams = [];
+      allParams = allParams.concat(getFilteredDefaultParams());
+      if (window.url_parameter_eraser_params) allParams = allParams.concat(window.url_parameter_eraser_params);
       links.forEach(link => {
         try {
           if (!link.href) return;
           const decodedHref = decodeIfEncoded(link.href);
           if (!decodedHref) return;
-          let url = new URL(decodedHref);
+          let url = new URL(decodedHref, window.location.origin);
           let params = new URLSearchParams(url.search);
           let modified = false;
           const removedKeys = [];
           const keys = Array.from(params.keys());
           keys.forEach(param => {
-            if (paramPattern.test(param) || paramPattern.test(decodeURIComponent(param))) {
-              params.delete(param);
-              if (param) {
-                removedKeys.push(param);
+            const paramObjs = allParams.filter(p => {
+              if (!p || !p.param) return false;
+              try {
+                const re = new RegExp(escapeRegex(p.param), 'i');
+                return re.test(param);
+              } catch (e) {
+                return p.param === param;
               }
-              modified = true;
+            });
+            for (const pObj of paramObjs) {
+              if (!pObj.domain || pObj.domain.trim() === '') {
+                params.delete(param);
+                if (param) removedKeys.push(param);
+                modified = true;
+                break;
+              }
+              if (url.hostname.includes(pObj.domain)) {
+                params.delete(param);
+                if (param) removedKeys.push(param);
+                modified = true;
+                break;
+              }
             }
           });
           if (modified) {
             const originalUrl = link.href;
             url.search = params.toString();
-            // 若原始 href 為 percent-encoded，需還原 encode 狀態（只 encode非 ASCII 部分，避免 query value 亂碼）
             if (/%[0-9a-fA-F]{2}/.test(originalUrl)) {
-              // 只 encode path/search/hash，且保留 query value 的原始編碼
               let encodedPath = encodeURI(url.pathname);
-              // 針對 search，保留 = 後的 value 原始編碼
               let encodedSearch = '';
               if (url.search) {
                 const searchParams = [];
                 url.searchParams.forEach((v, k) => {
-                  // 取原始 query string
                   const match = originalUrl.match(new RegExp('[?&]' + k + '=([^&#]*)'));
                   if (match) {
                     searchParams.push(k + '=' + match[1]);
@@ -197,7 +234,6 @@ function processLinks() {
       updateBadge(modifiedCount);
       sendProcessedLinks(processedLinks);
     } catch (e) {
-      // context 失效或其他錯誤時直接忽略
       return;
     }
   });
@@ -208,25 +244,40 @@ function cleanCurrentPageURL() {
   if (!paramPattern) {
     return;
   }
-
   try {
     let url = new URL(window.location.href);
     let params = new URLSearchParams(url.search);
     let modified = false;
-
-    // 收集所有參數的 key 逐一刪除
+    let allParams = [];
+    allParams = allParams.concat(getFilteredDefaultParams());
+    if (window.url_parameter_eraser_params) allParams = allParams.concat(window.url_parameter_eraser_params);
     const keys = Array.from(params.keys());
     keys.forEach(param => {
-      if (paramPattern.test(param)) {
-        params.delete(param);
-        modified = true;
+      const paramObjs = allParams.filter(p => {
+        if (!p || !p.param) return false;
+        try {
+          const re = new RegExp(escapeRegex(p.param), 'i');
+          return re.test(param);
+        } catch (e) {
+          return p.param === param;
+        }
+      });
+      for (const pObj of paramObjs) {
+        if (!pObj.domain || pObj.domain.trim() === '') {
+          params.delete(param);
+          modified = true;
+          break;
+        }
+        if (url.hostname.includes(pObj.domain)) {
+          params.delete(param);
+          modified = true;
+          break;
+        }
       }
     });
-
     if (modified) {
       url.search = params.toString();
       history.replaceState(null, '', url.toString());
-      // console.log(url.toString());
     }
   } catch (error) {
     console.warn("Failed to clean current page URL:", error);

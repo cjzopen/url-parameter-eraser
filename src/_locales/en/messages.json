@@ -11,6 +11,10 @@
   "optionsAddLabel": {
     "message": "Add Custom Parameter:"
   },
+  "optionsNoteLabel": { "message": "Note(option)" },
+  "optionsNotePlaceholder": { "message": "Why add this parameter?" },
+  "optionsDomainLabel": { "message": "Domain" },
+  "optionsDomainPlaceholder": { "message": "leave blank for all" },
   "optionsAddButton": {
     "message": "Add"
   },
@@ -52,18 +56,6 @@
   },
   "allFunctionCheckbox": {
     "message": "Disable all features for this domain"
-  },
-  "optionsNoteLabel": {
-    "message": "Note (optional, no function currently):"
-  },
-  "optionsNotePlaceholder": {
-    "message": "Why add this parameter?"
-  },
-  "optionsDomainLabel": {
-    "message": "Domain (optional, no function currently):"
-  },
-  "optionsDomainPlaceholder": {
-    "message": "e.g. google.com, leave blank for all"
   },
   "optionsTempMessage": {
     "message": "⚠️📢 The current version has rewritten the format and storage method of custom parameters to facilitate future updates. The storage location is still in your local browser, but if browser sync is enabled, your custom parameters can be applied across devices."

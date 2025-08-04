@@ -28,6 +28,8 @@ window.defaultParams = [
   { param: 'gclid', note: 'google ads', domain: '' },
   { param: 'gad_source', note: 'google ads', domain: '' },
   { param: 'gad_campaignid', note: 'google ads', domain: '' },
+  { param: 'campaignid', note: 'google ads', domain: '' },
+  { param: 'adgroupid', note: 'google ads', domain: '' },
   { param: 'gbraid', note: 'google ads', domain: '' },
   { param: 'trackingId', note: '', domain: '' },
   { param: 'srsltid', note: 'google merchant center', domain: '' },
@@ -62,16 +64,17 @@ window.defaultParams = [
   { param: 'is_from_webapp', note: '', domain: '' },
   { param: 'sender_device', note: '', domain: '' },
   { param: 'adgrpid', note: 'amazon', domain: '' },
-  { param: '^hv', note: 'amazon', domain: 'amazon.com' },
+  { param: '^hv', note: 'amazon', domain: 'amazon.co' },
   { param: 'hydadcr', note: 'amazon', domain: '' },
   { param: '^pd_rd_', note: 'amazon', domain: '' },
   { param: '^pf_rd_', note: 'amazon', domain: '' },
-  { param: 'content-id', note: '', domain: 'amazon.com' },
+  { param: 'content-id', note: '', domain: 'amazon.co' },
   { param: 'dib', note: 'amazon', domain: '' },
   { param: 'dib_tag', note: 'amazon', domain: '' },
   { param: 'qid', note: 'amazon', domain: '' },
   { param: 'sp_csd', note: 'amazon', domain: '' },
-  { param: 'rh', note: '', domain: 'amazon.com' },
+  { param: 'rh', note: '', domain: 'amazon.co' },
+  { param: 'ref', note: '', domain: 'amazon.co' },
   { param: 'rdt_cid', note: '', domain: '' },
   { param: 'li_fat_id', note: 'LinkedIn ad', domain: '' },
   { param: '^highlightedUpdate', note: '', domain: '' },
@@ -93,14 +96,33 @@ window.defaultParams = [
   { param: 'itmmeta', note: 'ebay', domain: '' },
   { param: 'itmprp', note: 'ebay', domain: '' },
   { param: '_trksid', note: 'ebay', domain: '' },
-  { param: 'hash', note: 'ebay', domain: 'ebay.com' },
+  // { param: 'hash', note: 'ebay', domain: 'ebay.com' },
   { param: 'af_xp', note: '', domain: '' },
   { param: 'shortlink', note: '', domain: '' },
   { param: 'fbid', note: '', domain: '' },
   { param: '^__cft__', note: 'facebook', domain: '' },
   { param: '__tn__', note: 'facebook', domain: '' },
+  { param: 'social_share', note: '', domain: '' },
+  { param: 'previewDohEventScheduleTesting', note: '', domain: '' },
+  { param: 'ecid', note: '', domain: '' },
+  { param: 'igsh', note: 'IG', domain: '' },
   { param: '^itm_', note: '', domain: '' }
 ];
+
+// cookies 參數
+// window.cookiesList = [
+//   { name: '^_ga', note: ''},
+//   { name: '^_ga', note: ''},
+//   { name: '^_gcl', note: ''},
+//   { name: '^_gid', note: ''},
+//   { name: '^_dc_gtm', note: ''},
+//   { name: '^_gat_', note: ''},
+//   { name: 'hubspotutk', note: ''},
+//   { name: '^__cf', note: ''},
+//   { name: '^__hs', note: ''},
+//   { name: '^_fbp', note: ''},
+// ];
+
 
 // 從 storage 中獲取參數
 function getStoredParams(keys, callback) {
@@ -125,6 +147,10 @@ function createParamsListElement(el, paramObj, isDefault, deleteCallback) {
     note = paramObj.note || '';
     domain = paramObj.domain || '';
   }
+  // 如果 domain 有值，li 加上 class="domain-only"
+  if (domain && domain.trim() !== '') {
+    li.classList.add('domain-only');
+  }
 
   // popoverId 只允許 _, -, 英文
   const safeParamIdName = param.replace(/[^a-zA-Z_-]/g, '');
@@ -146,7 +172,7 @@ function createParamsListElement(el, paramObj, isDefault, deleteCallback) {
   infoDiv.style.flexDirection = 'column';
   infoDiv.style.gap = '8px';
 
-  // Popover 關閉按鈕（SVG）
+  // Popover 關閉按鈕
   const closeBtn = document.createElement('button');
   closeBtn.setAttribute('popovertarget', popoverId);
   closeBtn.type = 'button';
@@ -155,13 +181,13 @@ function createParamsListElement(el, paramObj, isDefault, deleteCallback) {
   closeBtn.style.border = 'none';
   closeBtn.style.cursor = 'pointer';
   closeBtn.style.padding = '0';
-  // SVG內容
   closeBtn.innerHTML = '<svg width="24" height="24" viewBox="0 0 512 512" fill="currentColor"><use href="#svg-close-button"></use></svg>';
   infoDiv.appendChild(closeBtn);
 
   infoDiv.innerHTML += `<b>${param}</b>`;
   if (note) infoDiv.innerHTML += `<div>Note: ${note}</div>`;
   if (domain) infoDiv.innerHTML += `<div>Domain: ${domain}</div>`;
+  // 刪除按鈕
   const deleteButton = document.createElement('button');
   deleteButton.innerHTML = '<svg width="28" height="32" viewBox="0 0 448 512" fill="currentColor"><use href="#svg-delete-button"></use></svg>';
   deleteButton.style.color = '#ff2453';

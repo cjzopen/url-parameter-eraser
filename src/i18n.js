@@ -24,8 +24,16 @@ document.addEventListener('DOMContentLoaded', () => {
       document.querySelector('h1').textContent = chrome.i18n.getMessage('optionsTitle');
       document.querySelector('label[for="customParams"]').textContent = chrome.i18n.getMessage('optionsAddLabel');
       document.getElementById('add').textContent = chrome.i18n.getMessage('optionsAddButton');
-      // document.querySelector('label[for="customParamsNote"]').textContent = chrome.i18n.getMessage('optionsNoteLabel');
-      // document.querySelector('label[for="customParamsDomain"]').textContent = chrome.i18n.getMessage('optionsDomainLabel');
+      // i18n for customParamsNote
+      const noteLabel = document.querySelector('label[for="customParamsNote"]');
+      if (noteLabel) noteLabel.textContent = chrome.i18n.getMessage('optionsNoteLabel');
+      const noteInput = document.getElementById('customParamsNote');
+      if (noteInput) noteInput.placeholder = chrome.i18n.getMessage('optionsNotePlaceholder');
+      // i18n for customParamsDomain
+      const domainLabel = document.querySelector('label[for="customParamsDomain"]');
+      if (domainLabel) domainLabel.textContent = chrome.i18n.getMessage('optionsDomainLabel');
+      const domainInput = document.getElementById('customParamsDomain');
+      if (domainInput) domainInput.placeholder = chrome.i18n.getMessage('optionsDomainPlaceholder');
       // document.getElementById('tempMessage').textContent = chrome.i18n.getMessage('optionsTempMessage');
       document.getElementById('existingParamsTitle').textContent = chrome.i18n.getMessage('optionsExistingParams');
       document.getElementById('styleTitle').textContent = chrome.i18n.getMessage('optionsStyleTitle');

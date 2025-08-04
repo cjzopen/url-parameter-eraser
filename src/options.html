@@ -49,6 +49,19 @@ input[type="text"].underline-input {
   border-bottom: 1px solid var(--main-color);
   width: 240px;
 }
+#add-wrapper {
+  max-width: 460px;
+}
+.add-wrapper-list {
+  display: flex;
+  & > label {
+    width: 160px;
+    flex-shrink: 0;
+  }
+  & > input {
+    width: 100%;
+  }
+}
 #add {
   padding: 8px 16px;
   border-radius: 4px;
@@ -167,19 +180,24 @@ input[type="text"].underline-input {
 </style>
 <div id="all">
   <h1>__MSG_optionsTitle__</h1>
-  <div>
-    <label for="customParams">__MSG_optionsAddLabel__</label>
-    <input type="text" class="underline-input" id="customParams" placeholder="e.g., utm_source">
-    <button id="add">__MSG_optionsAddButton__</button>
+  <div id="add-wrapper">
+    <div class="add-wrapper-list">
+      <label for="customParams">__MSG_optionsAddLabel__</label>
+      <input type="text" class="underline-input" id="customParams" placeholder="e.g., utm_source">
+    </div>
+    <div class="add-wrapper-list">
+      <label for="customParamsNote">__MSG_optionsNoteLabel__</label>
+      <input type="text" class="underline-input" id="customParamsNote" placeholder="__MSG_optionsNotePlaceholder__">
+    </div>
+    <div class="add-wrapper-list">
+      <label for="customParamsDomain">__MSG_optionsDomainLabel__</label>
+      <input type="text" class="underline-input" id="customParamsDomain" placeholder="__MSG_optionsDomainPlaceholder__">
+    </div>
+    <div>
+      <button id="add">__MSG_optionsAddButton__</button>
+    </div>
   </div>
-  <div>
-    <label for="customParamsNote">__MSG_optionsNoteLabel__</label>
-    <input type="text" class="underline-input" id="customParamsNote" placeholder="Why add this parameter?">
-  </div>
-  <div>
-    <label for="customParamsDomain">__MSG_optionsDomainLabel__</label>
-    <input type="text" class="underline-input" id="customParamsDomain" placeholder="leave blank for all">
-  </div>
+  
   <!-- <div id="tempMessage">__MSG_optionsTempMessage__</div> -->
   <h2 id="existingParamsTitle">__MSG_optionsExistingParams__</h2>
   <ul id="paramsList"></ul>
