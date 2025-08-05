@@ -96,7 +96,7 @@ window.defaultParams = [
   { param: 'itmmeta', note: 'ebay', domain: '' },
   { param: 'itmprp', note: 'ebay', domain: '' },
   { param: '_trksid', note: 'ebay', domain: '' },
-  // { param: 'hash', note: 'ebay', domain: 'ebay.com' },
+  { param: 'hash', note: 'ebay', domain: 'ebay.com' },
   { param: 'af_xp', note: '', domain: '' },
   { param: 'shortlink', note: '', domain: '' },
   { param: 'fbid', note: '', domain: '' },

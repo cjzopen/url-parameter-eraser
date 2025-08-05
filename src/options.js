@@ -129,11 +129,9 @@ document.addEventListener('DOMContentLoaded', function() {
       const updatedParams = customParams.filter(p => p.param !== paramToDelete);
       saveParams('url_parameter_eraser_params', updatedParams, function() {
         chrome.storage.sync.set({ url_parameter_eraser_params: updatedParams }, function() {
-          // 重新取得 defaultParams，確保 UI 正確
-          getStoredParams(['defaultParams'], function(data2) {
-            let defaultParams = Array.isArray(data2.defaultParams) ? data2.defaultParams : [];
-            updateParamsList(paramsList, defaultParams, updatedParams, deleteDefaultParam, deleteCustomParam);
-          });
+          // 直接用 window.defaultParams，避免 UI 全部消失
+          let defaultParams = Array.isArray(window.defaultParams) ? window.defaultParams : [];
+          updateParamsList(paramsList, defaultParams, updatedParams, deleteDefaultParam, deleteCustomParam);
         });
       });
     });
