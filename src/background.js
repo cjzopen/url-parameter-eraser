@@ -1,17 +1,55 @@
 // console.log("Background script started.");
 
-// 確保 Service Worker 正常啟動
-// chrome.runtime.onInstalled.addListener(() => {
-//   console.log("Extension installed.");
-// });
-
-// 測試規則是否正確載入
-// chrome.declarativeNetRequest.getDynamicRules((rules) => {
-//   console.log("Dynamic rules loaded:", rules);
-// });
+// 載入共用的預設參數清單與 DNR 規則產生器（classic service worker，可用 importScripts）。
+importScripts('default-params.js', 'dnr-rules.js');
 
 const tabModifiedCounts = {}; // 用於記錄每個分頁的 modifiedCount
 const tabProcessedLinks = {}; // 用於記錄每個分頁的處理後連結
+
+// ---- declarativeNetRequest：在請求送出前移除追蹤參數 ----
+
+// 取得「有效參數」清單：defaultParams（扣除 defaultParamsCancel 白名單）+ 自訂參數。
+// 與 content script 的 initParamPattern 同樣讀 sync storage，缺值時 fallback 到 self.defaultParams。
+function getEffectiveParams(callback) {
+  chrome.storage.sync.get(['url_parameter_eraser_params', 'defaultParams', 'defaultParamsCancel'], (data) => {
+    const defaults = Array.isArray(data.defaultParams) ? data.defaultParams : (self.defaultParams || []);
+    const custom = Array.isArray(data.url_parameter_eraser_params) ? data.url_parameter_eraser_params : [];
+    const cancel = Array.isArray(data.defaultParamsCancel) ? data.defaultParamsCancel : [];
+    const cancelKeys = new Set(cancel.map(c => (typeof c === 'string' ? c : (c && c.param))).filter(Boolean));
+    const normalize = (p) => (typeof p === 'string'
+      ? { param: p, domain: '' }
+      : { param: p && p.param, domain: (p && p.domain) || '' });
+    const effectiveDefaults = defaults.map(normalize).filter(p => p.param && !cancelKeys.has(p.param));
+    const effectiveCustom = custom.map(normalize).filter(p => p.param);
+    callback([...effectiveDefaults, ...effectiveCustom]);
+  });
+}
+
+// 依目前的有效參數重建 DNR dynamic rules（先移除舊規則再加入新規則）。
+function rebuildDnrRules() {
+  getEffectiveParams((params) => {
+    const { rules, fallback } = self.buildDnrRules(
+      params, self.prefixExpansions || {}, self.domainExpansions || {}, 1
+    );
+    chrome.declarativeNetRequest.getDynamicRules((existing) => {
+      const removeRuleIds = (existing || []).map(r => r.id);
+      chrome.declarativeNetRequest.updateDynamicRules({ removeRuleIds, addRules: rules }, () => {
+        if (chrome.runtime.lastError) {
+          console.error('Failed to update DNR rules:', chrome.runtime.lastError.message);
+        } else {
+          console.log(`DNR rules updated: ${rules.length} rule(s), ${fallback.length} fallback-only param(s).`);
+        }
+      });
+    });
+  });
+}
+
+// 參數 / 白名單變更時重建規則。
+chrome.storage.onChanged.addListener((changes, area) => {
+  if (area === 'sync' && (changes.url_parameter_eraser_params || changes.defaultParams || changes.defaultParamsCancel)) {
+    rebuildDnrRules();
+  }
+});
 
 // 更新 Badge 的顏色和文字
 function updateBadge(tabId, count, isDisabled) {
@@ -68,11 +106,13 @@ function cleanUpTabStorage() {
 // 當擴充套件啟動時清空 extension storage Local
 chrome.runtime.onStartup.addListener(() => {
   cleanUpTabStorage();
+  rebuildDnrRules();
 });
 
 // 當擴充套件安裝或更新時清空 extension storage Local
 chrome.runtime.onInstalled.addListener(() => {
   cleanUpTabStorage();
+  rebuildDnrRules();
 });
 
 // 當分頁被移除時，刪除對應的記錄
