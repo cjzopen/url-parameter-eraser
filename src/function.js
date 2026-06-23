@@ -26,6 +26,19 @@ function saveParams(key, params, callback) {
   chrome.storage.sync.set({ [key]: params }, callback);
 }
 
+// 判斷某參數的清除機制：
+//   'before' → declarativeNetRequest 在「載入前」攔截（🛡），追蹤伺服器收不到該參數。
+//   'after'  → 無法用 DNR 表達，只能由 content script 在「載入後」補清（🧹）。
+// 判定邏輯與 dnr-rules.js 的 fallback 完全一致：
+//   非前綴參數一律可用 DNR；前綴參數（^ 開頭）唯有在 prefixExpansions 有展開表時才算 DNR。
+function getParamMechanism(param) {
+  const resolve = globalThis.resolveRemoveParamNames;
+  const names = typeof resolve === 'function'
+    ? resolve(param, globalThis.prefixExpansions)
+    : (typeof param === 'string' && param && !param.startsWith('^') ? [param] : null);
+  return names ? 'before' : 'after';
+}
+
 // 創建參數列表項
 function createParamsListElement(el, paramObj, isDefault, deleteCallback) {
   const li = document.createElement('li');
@@ -44,13 +57,19 @@ function createParamsListElement(el, paramObj, isDefault, deleteCallback) {
     li.classList.add('domain-only');
   }
 
+  // 清除機制：標示此參數是「載入前攔截 (DNR)」還是「載入後清除」
+  const mechanism = getParamMechanism(param);
+  const isBefore = mechanism === 'before';
+  const mechIcon = isBefore ? '🛡' : '🧹';
+  li.classList.add(isBefore ? 'mech-before' : 'mech-after');
+
   // popoverId 只允許 _, -, 英文
   const safeParamIdName = param.replace(/[^a-zA-Z_-]/g, '');
   const popoverId = `param-${safeParamIdName}`;
 
-  // Popover 按鈕
+  // Popover 按鈕（前綴清除機制圖示，方便整列掃視）
   const popoverBtn = document.createElement('button');
-  popoverBtn.textContent = param;
+  popoverBtn.textContent = `${mechIcon} ${param}`;
   popoverBtn.setAttribute('popovertarget', popoverId);
   popoverBtn.classList.add('paramsListPopover');
   li.appendChild(popoverBtn);
@@ -77,6 +96,9 @@ function createParamsListElement(el, paramObj, isDefault, deleteCallback) {
   infoDiv.appendChild(closeBtn);
 
   infoDiv.innerHTML += `<b>${param}</b>`;
+  // 清除機制說明（套用已備妥的 i18n 文案）
+  const mechLabel = chrome.i18n.getMessage(isBefore ? 'optionsMechBeforeLabel' : 'optionsMechAfterLabel');
+  if (mechLabel) infoDiv.innerHTML += `<div>${mechLabel}</div>`;
   if (note) infoDiv.innerHTML += `<div>Note: ${note}</div>`;
   if (domain) infoDiv.innerHTML += `<div>Domain: ${domain}</div>`;
   // 刪除按鈕

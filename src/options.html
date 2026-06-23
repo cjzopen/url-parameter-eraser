@@ -4,6 +4,7 @@
   <meta charset="utf-8">
   <title>__MSG_optionsTitle__</title>
   <script src="default-params.js" defer></script>
+  <script src="dnr-rules.js" defer></script>
   <script src="function.js" defer></script>
   <script src="options.js" defer></script>
   <script src="i18n.js" defer></script>
@@ -121,6 +122,13 @@ input[type="text"].underline-input {
   margin: 4px;
   &:has(.paramsListPopover:hover) {
     opacity: .6;
+  }
+  &.mech-after {
+    background-color: color-mix(in srgb, var(--main-color) 12%, #fff);
+    box-shadow: 0 0 0 1px color-mix(in srgb, var(--main-color) 40%, transparent);
+    .paramsListPopover {
+      color: var(--main-color);
+    }
   }
 }
 .paramsListPopover {
