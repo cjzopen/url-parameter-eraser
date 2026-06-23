@@ -24,6 +24,21 @@
   "optionsStyleTitle": {
     "message": "Link Style Settings"
   },
+  "optionsMechTitle": {
+    "message": "How tracking parameters are removed"
+  },
+  "optionsMechBefore": {
+    "message": "Blocked before load: removed before the request is sent, so the tracker never receives it."
+  },
+  "optionsMechAfter": {
+    "message": "Cleaned after load only: the request has already been sent; only the address bar and on-page links are cleaned."
+  },
+  "optionsMechBeforeLabel": {
+    "message": "🛡 Blocked before load (DNR)"
+  },
+  "optionsMechAfterLabel": {
+    "message": "🧹 Cleaned after load only"
+  },
   "popupTitle": {
     "message": "URL Parameter Eraser"
   },

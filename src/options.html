@@ -75,6 +75,31 @@ input[type="text"].underline-input {
     background-color: var(--main-color-hover);
   }
 }
+.mechanism-legend {
+  max-width: 640px;
+  margin: .5rem 0 1rem;
+  padding: 12px 16px;
+  border-radius: 8px;
+  border: 1px solid color-mix(in srgb, var(--main-color) 30%, transparent);
+  background-color: color-mix(in srgb, var(--main-color) 8%, transparent);
+  display: flex;
+  flex-direction: column;
+  gap: .5rem;
+  font-size: 14px;
+  line-height: 1.5;
+  .mechanism-legend-title {
+    font-weight: bold;
+    color: var(--main-color);
+  }
+  .mechanism-legend-row {
+    display: flex;
+    align-items: flex-start;
+    gap: .5rem;
+  }
+  .mechanism-icon {
+    flex-shrink: 0;
+  }
+}
 #paramsList {
   list-style-type: none;
   padding: 0;
@@ -203,6 +228,17 @@ input[type="text"].underline-input {
   
   <!-- <div id="tempMessage">__MSG_optionsTempMessage__</div> -->
   <h2 id="existingParamsTitle">__MSG_optionsExistingParams__</h2>
+  <div id="mechanismLegend" class="mechanism-legend">
+    <div id="mechanismTitle" class="mechanism-legend-title">__MSG_optionsMechTitle__</div>
+    <div class="mechanism-legend-row">
+      <span class="mechanism-icon">🛡</span>
+      <span id="mechanismBeforeText">__MSG_optionsMechBefore__</span>
+    </div>
+    <div class="mechanism-legend-row">
+      <span class="mechanism-icon">🧹</span>
+      <span id="mechanismAfterText">__MSG_optionsMechAfter__</span>
+    </div>
+  </div>
   <ul id="paramsList"></ul>
   <h2 style="margin-top: 4rem;" id="styleTitle">__MSG_optionsStyleTitle__</h2>
   <div>

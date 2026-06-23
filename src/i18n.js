@@ -37,6 +37,13 @@ document.addEventListener('DOMContentLoaded', () => {
       // document.getElementById('tempMessage').textContent = chrome.i18n.getMessage('optionsTempMessage');
       document.getElementById('existingParamsTitle').textContent = chrome.i18n.getMessage('optionsExistingParams');
       document.getElementById('styleTitle').textContent = chrome.i18n.getMessage('optionsStyleTitle');
+      // 追蹤參數清除機制圖例
+      const mechTitle = document.getElementById('mechanismTitle');
+      if (mechTitle) mechTitle.textContent = chrome.i18n.getMessage('optionsMechTitle');
+      const mechBefore = document.getElementById('mechanismBeforeText');
+      if (mechBefore) mechBefore.textContent = chrome.i18n.getMessage('optionsMechBefore');
+      const mechAfter = document.getElementById('mechanismAfterText');
+      if (mechAfter) mechAfter.textContent = chrome.i18n.getMessage('optionsMechAfter');
     }
   };
 

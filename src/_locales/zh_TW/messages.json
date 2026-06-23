@@ -25,6 +25,21 @@
   "optionsStyleTitle": {
     "message": "改寫連結的樣式設定"
   },
+  "optionsMechTitle": {
+    "message": "追蹤參數清除機制"
+  },
+  "optionsMechBefore": {
+    "message": "載入前攔截：請求送出前就移除，追蹤方收不到。"
+  },
+  "optionsMechAfter": {
+    "message": "僅載入後清理：請求已送出，只清掉網址列與頁面連結。"
+  },
+  "optionsMechBeforeLabel": {
+    "message": "🛡 載入前攔截（DNR）"
+  },
+  "optionsMechAfterLabel": {
+    "message": "🧹 僅載入後清理"
+  },
   "popupTitle": {
     "message": "URL Parameter Eraser"
   },

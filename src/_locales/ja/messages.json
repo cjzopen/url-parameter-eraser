@@ -25,6 +25,21 @@
   "optionsStyleTitle": {
     "message": "リンク書き換えのスタイル設定"
   },
+  "optionsMechTitle": {
+    "message": "トラッキングパラメータの除去方式"
+  },
+  "optionsMechBefore": {
+    "message": "読み込み前にブロック：リクエスト送信前に除去されるため、トラッカーには届きません。"
+  },
+  "optionsMechAfter": {
+    "message": "読み込み後のみ整理：リクエストは送信済みで、アドレスバーとページ内リンクのみを整理します。"
+  },
+  "optionsMechBeforeLabel": {
+    "message": "🛡 読み込み前にブロック（DNR）"
+  },
+  "optionsMechAfterLabel": {
+    "message": "🧹 読み込み後のみ整理"
+  },
   "popupTitle": {
     "message": "URL Parameter Eraser"
   },
