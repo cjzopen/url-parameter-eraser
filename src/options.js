@@ -34,6 +34,15 @@ document.addEventListener('DOMContentLoaded', function() {
   // 從全局變數讀取 defaultParams
   let defaultParams = Array.isArray(window.defaultParams) ? [...window.defaultParams] : [];
 
+  // 要顯示／套用的預設參數 = 內建清單（default-params.js）扣除使用者刪除的（defaultParamsCancel 白名單）。
+  // 刻意「不持久化 defaultParams」，這樣版本更新時 default-params.js 新增的參數會自動出現，
+  // 已刪除的仍因 cancel 名單而不顯示。
+  function getEffectiveDefaultParams(cancelArr) {
+    const cancel = Array.isArray(cancelArr) ? cancelArr : [];
+    const base = Array.isArray(window.defaultParams) ? window.defaultParams : defaultParams;
+    return base.filter(p => !cancel.includes(typeof p === 'string' ? p : p.param));
+  }
+
   // 儲存自訂參數
   addButton.addEventListener('click', function() {
     let customParams = customParamsInput.value.split(',').map(param => escapeRegex(param.trim())).filter(param => param);
@@ -41,9 +50,8 @@ document.addEventListener('DOMContentLoaded', function() {
     let domain = customParamsDomainInput ? customParamsDomainInput.value.trim().toLowerCase() : '';
     if (!domain) domain = '';
     if (!customParams.length) return;
-    getStoredParams(['url_parameter_eraser_params', 'defaultParams'], function(data) {
+    getStoredParams(['url_parameter_eraser_params', 'defaultParamsCancel'], function(data) {
       let existingParams = Array.isArray(data.url_parameter_eraser_params) ? data.url_parameter_eraser_params : [];
-      let defaultParamsLatest = Array.isArray(data.defaultParams) ? data.defaultParams : defaultParams;
       existingParams = existingParams.map(p => {
         if (typeof p === 'string') return {param: p, note: '', domain: ''};
         if (!('domain' in p)) p.domain = '';
@@ -59,18 +67,16 @@ document.addEventListener('DOMContentLoaded', function() {
         }
       });
       saveParams('url_parameter_eraser_params', existingParams, function() {
-        chrome.storage.sync.set({ url_parameter_eraser_params: existingParams }, function() {
-          updateParamsList(paramsList, defaultParamsLatest, existingParams, deleteDefaultParam, deleteCustomParam);
-          customParamsInput.value = '';
-          if (customParamsNoteInput) customParamsNoteInput.value = '';
-          if (customParamsDomainInput) customParamsDomainInput.value = '';
-        });
+        updateParamsList(paramsList, getEffectiveDefaultParams(data.defaultParamsCancel), existingParams, deleteDefaultParam, deleteCustomParam);
+        customParamsInput.value = '';
+        if (customParamsNoteInput) customParamsNoteInput.value = '';
+        if (customParamsDomainInput) customParamsDomainInput.value = '';
       });
     });
   });
 
   // 加載已保存的設置
-  getStoredParams(['url_parameter_eraser_params', 'defaultParams', 'defaultParamsCancel'], function(data) {
+  getStoredParams(['url_parameter_eraser_params', 'defaultParamsCancel'], function(data) {
     let customParams = Array.isArray(data.url_parameter_eraser_params) ? data.url_parameter_eraser_params : [];
     // 兼容舊格式，補 domain
     customParams = customParams.map(p => {
@@ -78,12 +84,7 @@ document.addEventListener('DOMContentLoaded', function() {
       if (!('domain' in p)) p.domain = '';
       return p;
     });
-    // 處理 defaultParamsCancel 過濾
-    let defaultParamsCancel = Array.isArray(data.defaultParamsCancel) ? data.defaultParamsCancel : [];
-    // 以 window.defaultParams 為主，確保版本更新時新參數會出現，已刪除的仍不顯示
-    let filteredDefaultParams = (Array.isArray(window.defaultParams) ? window.defaultParams : defaultParams)
-      .filter(p => !defaultParamsCancel.includes(typeof p === 'string' ? p : p.param));
-    updateParamsList(paramsList, filteredDefaultParams, customParams, deleteDefaultParam, deleteCustomParam);
+    updateParamsList(paramsList, getEffectiveDefaultParams(data.defaultParamsCancel), customParams, deleteDefaultParam, deleteCustomParam);
     // 若 local 沒有但 sync 有，則同步回 local
     if (!data.url_parameter_eraser_params) {
       chrome.storage.sync.get(['url_parameter_eraser_params'], function(syncData) {
@@ -94,31 +95,21 @@ document.addEventListener('DOMContentLoaded', function() {
     }
   });
 
-  // 刪除 defaultParams 中的參數，並記錄到 defaultParamsCancel
+  // 刪除預設參數：只記錄到 defaultParamsCancel 白名單，不動內建清單、也不持久化 defaultParams。
   function deleteDefaultParam(paramToDelete) {
-    // 取得現有 defaultParamsCancel
-    chrome.storage.sync.get(['defaultParamsCancel'], function(data) {
+    chrome.storage.sync.get(['defaultParamsCancel', 'url_parameter_eraser_params'], function(data) {
       let cancelList = Array.isArray(data.defaultParamsCancel) ? data.defaultParamsCancel : [];
-      // 只記錄 param 字串
       if (!cancelList.includes(paramToDelete)) cancelList.push(paramToDelete);
       chrome.storage.sync.set({ defaultParamsCancel: cancelList }, function() {
-        // 過濾 defaultParams 並更新畫面
-        defaultParams = defaultParams.filter(p => (typeof p === 'string' ? p : p.param) !== paramToDelete);
-        window.defaultParams = defaultParams;
-        saveParams('defaultParams', defaultParams, function() {
-          // 重新取得 customParams，確保 UI 正確
-          getStoredParams(['url_parameter_eraser_params'], function(data2) {
-            let customParams = Array.isArray(data2.url_parameter_eraser_params) ? data2.url_parameter_eraser_params : [];
-            updateParamsList(paramsList, defaultParams, customParams, deleteDefaultParam, deleteCustomParam);
-          });
-        });
+        let customParams = Array.isArray(data.url_parameter_eraser_params) ? data.url_parameter_eraser_params : [];
+        updateParamsList(paramsList, getEffectiveDefaultParams(cancelList), customParams, deleteDefaultParam, deleteCustomParam);
       });
     });
   }
 
   // 刪除 customParams 中的參數
   function deleteCustomParam(paramToDelete) {
-    getStoredParams(['url_parameter_eraser_params'], function(data) {
+    getStoredParams(['url_parameter_eraser_params', 'defaultParamsCancel'], function(data) {
       let customParams = Array.isArray(data.url_parameter_eraser_params) ? data.url_parameter_eraser_params : [];
       // 兼容舊格式，補 domain
       customParams = customParams.map(p => {
@@ -128,11 +119,8 @@ document.addEventListener('DOMContentLoaded', function() {
       });
       const updatedParams = customParams.filter(p => p.param !== paramToDelete);
       saveParams('url_parameter_eraser_params', updatedParams, function() {
-        chrome.storage.sync.set({ url_parameter_eraser_params: updatedParams }, function() {
-          // 直接用 window.defaultParams，避免 UI 全部消失
-          let defaultParams = Array.isArray(window.defaultParams) ? window.defaultParams : [];
-          updateParamsList(paramsList, defaultParams, updatedParams, deleteDefaultParam, deleteCustomParam);
-        });
+        // 預設參數一律用「內建清單 − cancel」，避免被刪的預設參數重新出現
+        updateParamsList(paramsList, getEffectiveDefaultParams(data.defaultParamsCancel), updatedParams, deleteDefaultParam, deleteCustomParam);
       });
     });
   }

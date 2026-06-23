@@ -8,11 +8,12 @@ const tabProcessedLinks = {}; // 用於記錄每個分頁的處理後連結
 
 // ---- declarativeNetRequest：在請求送出前移除追蹤參數 ----
 
-// 取得「有效參數」清單：defaultParams（扣除 defaultParamsCancel 白名單）+ 自訂參數。
-// 與 content script 的 initParamPattern 同樣讀 sync storage，缺值時 fallback 到 self.defaultParams。
+// 取得「有效參數」清單：內建 defaultParams（扣除 defaultParamsCancel 白名單）+ 自訂參數。
+// 預設清單一律以 self.defaultParams（default-params.js）為準，不讀任何持久化快照，
+// 確保版本更新時新參數會自動套用。與 content script 的 initParamPattern 行為一致。
 function getEffectiveParams(callback) {
-  chrome.storage.sync.get(['url_parameter_eraser_params', 'defaultParams', 'defaultParamsCancel'], (data) => {
-    const defaults = Array.isArray(data.defaultParams) ? data.defaultParams : (self.defaultParams || []);
+  chrome.storage.sync.get(['url_parameter_eraser_params', 'defaultParamsCancel'], (data) => {
+    const defaults = self.defaultParams || [];
     const custom = Array.isArray(data.url_parameter_eraser_params) ? data.url_parameter_eraser_params : [];
     const cancel = Array.isArray(data.defaultParamsCancel) ? data.defaultParamsCancel : [];
     const cancelKeys = new Set(cancel.map(c => (typeof c === 'string' ? c : (c && c.param))).filter(Boolean));
@@ -46,10 +47,21 @@ function rebuildDnrRules() {
 
 // 參數 / 白名單變更時重建規則。
 chrome.storage.onChanged.addListener((changes, area) => {
-  if (area === 'sync' && (changes.url_parameter_eraser_params || changes.defaultParams || changes.defaultParamsCancel)) {
+  if (area === 'sync' && (changes.url_parameter_eraser_params || changes.defaultParamsCancel)) {
     rebuildDnrRules();
   }
 });
+
+// 一次性清理：舊版刪除預設參數時會把整份 defaultParams 快照寫進 sync，
+// 這會凍結清單（版本更新後新參數不會出現）並佔用 sync 配額。現在改用 cancel 名單，
+// 故移除這個過時的 key。一律改由 default-params.js 提供最新內建清單。
+function removeObsoleteDefaultParamsKey() {
+  chrome.storage.sync.remove('defaultParams', () => {
+    if (chrome.runtime.lastError) {
+      console.warn('Failed to remove obsolete sync defaultParams:', chrome.runtime.lastError.message);
+    }
+  });
+}
 
 // 更新 Badge 的顏色和文字
 function updateBadge(tabId, count, isDisabled) {
@@ -112,6 +124,7 @@ chrome.runtime.onStartup.addListener(() => {
 // 當擴充套件安裝或更新時清空 extension storage Local
 chrome.runtime.onInstalled.addListener(() => {
   cleanUpTabStorage();
+  removeObsoleteDefaultParamsKey();
   rebuildDnrRules();
 });
 

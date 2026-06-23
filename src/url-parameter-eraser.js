@@ -15,8 +15,9 @@ function escapeRegex(input) {
 
 // 初始化 paramPattern，正規表達式自動忽略大小寫
 function initParamPattern(callback) {
-  getStoredParams(['url_parameter_eraser_params', 'defaultParams', 'defaultParamsCancel'], function(data) {
-    const defaultParams = Array.isArray(data.defaultParams) ? data.defaultParams : window.defaultParams;
+  getStoredParams(['url_parameter_eraser_params', 'defaultParamsCancel'], function(data) {
+    // 預設清單一律以 default-params.js 為準，不讀持久化快照，確保版本更新時新參數會套用。
+    const defaultParams = Array.isArray(window.defaultParams) ? window.defaultParams : [];
     const customParams = Array.isArray(data.url_parameter_eraser_params) ? data.url_parameter_eraser_params : [];
     let cancelArr = Array.isArray(data.defaultParamsCancel) ? data.defaultParamsCancel : [];
     // 如果 local 沒有，從 sync fallback
