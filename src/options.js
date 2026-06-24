@@ -9,13 +9,35 @@ document.addEventListener('DOMContentLoaded', function() {
   const enableOutlineCheckbox = document.getElementById('enableOutline');
   const outlineDemo = document.getElementById('outlineDemo');
 
-  // 「載入前固定攔截」前綴對照表：直接由 prefixExpansions 產生（與 DNR 規則同源），
+  // 兼容舊格式：自訂參數補成 {param, note, domain}
+  function normalizeCustom(arr) {
+    return (Array.isArray(arr) ? arr : []).map(p => {
+      if (typeof p === 'string') return { param: p, note: '', domain: '' };
+      if (!('domain' in p)) p.domain = '';
+      return p;
+    });
+  }
+
+  // 重新讀取 storage 並重繪三個區塊：參數列表、前綴對照表、還原清單。
+  function refreshAll() {
+    getStoredParams(['url_parameter_eraser_params', 'defaultParamsCancel'], function(data) {
+      const cancel = Array.isArray(data.defaultParamsCancel) ? data.defaultParamsCancel : [];
+      const customParams = normalizeCustom(data.url_parameter_eraser_params);
+      updateParamsList(paramsList, getEffectiveDefaultParams(cancel), customParams, deleteDefaultParam, deleteCustomParam);
+      renderPrefixTable(cancel);
+      renderRestoreList(cancel, customParams);
+    });
+  }
+
+  // 「載入前固定攔截」前綴對照表：由 prefixExpansions 產生（與 DNR 規則同源）並扣除已刪除（cancel）的前綴，
   // 表格增修時此處自動同步。讓使用者知道這些前綴已內建、無需手動新增。
-  function renderPrefixTable() {
+  function renderPrefixTable(cancelArr) {
     const container = document.getElementById('prefixTable');
     if (!container) return;
+    container.textContent = '';
+    const cancel = Array.isArray(cancelArr) ? cancelArr : [];
     const expansions = (typeof globalThis !== 'undefined' && globalThis.prefixExpansions) || {};
-    const prefixes = Object.keys(expansions);
+    const prefixes = Object.keys(expansions).filter(p => !cancel.includes(p));
     if (!prefixes.length) return;
 
     const title = document.createElement('div');
@@ -37,7 +59,44 @@ document.addEventListener('DOMContentLoaded', function() {
     });
     container.appendChild(table);
   }
-  renderPrefixTable();
+
+  // 還原清單：列出被刪除（在 cancel 中）且確實是內建預設的參數，各給一顆「還原」鈕（逐一還原）。
+  function renderRestoreList(cancelArr, customParams) {
+    const section = document.getElementById('restoreSection');
+    const list = document.getElementById('restoreList');
+    if (!section || !list) return;
+    list.textContent = '';
+    const cancel = Array.isArray(cancelArr) ? cancelArr : [];
+    const defaultNames = (Array.isArray(window.defaultParams) ? window.defaultParams : [])
+      .map(p => (typeof p === 'string' ? p : p.param));
+    const deleted = cancel.filter(c => defaultNames.includes(c));
+    section.hidden = deleted.length === 0;
+    deleted.forEach(param => {
+      const li = document.createElement('li');
+      const name = document.createElement('span');
+      name.className = 'restore-name';
+      name.textContent = param;
+      const btn = document.createElement('button');
+      btn.className = 'restore-btn';
+      btn.textContent = chrome.i18n.getMessage('optionsRestoreButton');
+      btn.addEventListener('click', () => restoreDefaultParam(param));
+      li.appendChild(name);
+      li.appendChild(btn);
+      list.appendChild(li);
+    });
+  }
+
+  // 還原內建參數 = 移出 cancel 名單 + 直接吸收掉同名自訂（含其 note/domain 一併丟棄）。
+  function restoreDefaultParam(param) {
+    getStoredParams(['url_parameter_eraser_params', 'defaultParamsCancel'], function(data) {
+      const cancel = (Array.isArray(data.defaultParamsCancel) ? data.defaultParamsCancel : [])
+        .filter(c => c !== param);
+      const customParams = normalizeCustom(data.url_parameter_eraser_params).filter(p => p.param !== param);
+      chrome.storage.sync.set({ defaultParamsCancel: cancel }, function() {
+        saveParams('url_parameter_eraser_params', customParams, refreshAll);
+      });
+    });
+  }
 
   // 限制輸入內容並進行正則表達式轉義
   customParamsInput.addEventListener('input', function() {
@@ -73,49 +132,61 @@ document.addEventListener('DOMContentLoaded', function() {
     return base.filter(p => !cancel.includes(typeof p === 'string' ? p : p.param));
   }
 
-  // 儲存自訂參數
+  // 顯示新增結果訊息（防呆提示）
+  function showAddFeedback(msg, isError) {
+    const el = document.getElementById('addFeedback');
+    if (!el) return;
+    el.textContent = msg || '';
+    el.classList.toggle('is-error', !!isError);
+  }
+
+  // 儲存自訂參數（含防呆：已存在的參數不可重複新增）
   addButton.addEventListener('click', function() {
-    let customParams = customParamsInput.value.split(',').map(param => escapeRegex(param.trim())).filter(param => param);
-    let note = customParamsNoteInput ? customParamsNoteInput.value.trim() : '';
+    const inputs = customParamsInput.value.split(',').map(p => escapeRegex(p.trim())).filter(Boolean);
+    const note = customParamsNoteInput ? customParamsNoteInput.value.trim() : '';
     let domain = customParamsDomainInput ? customParamsDomainInput.value.trim().toLowerCase() : '';
     if (!domain) domain = '';
-    if (!customParams.length) return;
+    if (!inputs.length) return;
     getStoredParams(['url_parameter_eraser_params', 'defaultParamsCancel'], function(data) {
-      let existingParams = Array.isArray(data.url_parameter_eraser_params) ? data.url_parameter_eraser_params : [];
-      existingParams = existingParams.map(p => {
-        if (typeof p === 'string') return {param: p, note: '', domain: ''};
-        if (!('domain' in p)) p.domain = '';
-        return p;
-      });
-      customParams.forEach(param => {
-        const idx = existingParams.findIndex(p => p.param === param);
-        if (idx !== -1) {
-          existingParams[idx].note = note;
-          existingParams[idx].domain = domain;
+      const cancel = Array.isArray(data.defaultParamsCancel) ? data.defaultParamsCancel : [];
+      const existingParams = normalizeCustom(data.url_parameter_eraser_params);
+      // 有效集合 = 內建（−cancel）+ 現有自訂；命中即視為「已存在」，不重複新增。
+      const activeNames = new Set([
+        ...getEffectiveDefaultParams(cancel).map(p => (typeof p === 'string' ? p : p.param)),
+        ...existingParams.map(p => p.param)
+      ]);
+      const added = [];
+      const duplicates = [];
+      inputs.forEach(param => {
+        if (activeNames.has(param)) {
+          duplicates.push(param);
         } else {
-          existingParams.push({param, note, domain});
+          existingParams.push({ param, note, domain });
+          activeNames.add(param);
+          added.push(param);
         }
       });
+      const dupMsg = duplicates.length
+        ? chrome.i18n.getMessage('optionsDuplicateMsg', duplicates.join(', '))
+        : '';
+      if (!added.length) {
+        showAddFeedback(dupMsg, true);
+        return;
+      }
       saveParams('url_parameter_eraser_params', existingParams, function() {
-        updateParamsList(paramsList, getEffectiveDefaultParams(data.defaultParamsCancel), existingParams, deleteDefaultParam, deleteCustomParam);
         customParamsInput.value = '';
         if (customParamsNoteInput) customParamsNoteInput.value = '';
         if (customParamsDomainInput) customParamsDomainInput.value = '';
+        showAddFeedback(dupMsg, duplicates.length > 0);
+        refreshAll();
       });
     });
   });
 
   // 加載已保存的設置
   getStoredParams(['url_parameter_eraser_params', 'defaultParamsCancel'], function(data) {
-    let customParams = Array.isArray(data.url_parameter_eraser_params) ? data.url_parameter_eraser_params : [];
-    // 兼容舊格式，補 domain
-    customParams = customParams.map(p => {
-      if (typeof p === 'string') return {param: p, note: '', domain: ''};
-      if (!('domain' in p)) p.domain = '';
-      return p;
-    });
-    updateParamsList(paramsList, getEffectiveDefaultParams(data.defaultParamsCancel), customParams, deleteDefaultParam, deleteCustomParam);
-    // 若 local 沒有但 sync 有，則同步回 local
+    refreshAll();
+    // 若 local 沒有但 sync 有，則同步回 local（沿用既有相容行為）
     if (!data.url_parameter_eraser_params) {
       chrome.storage.sync.get(['url_parameter_eraser_params'], function(syncData) {
         if (Array.isArray(syncData.url_parameter_eraser_params)) {
@@ -127,31 +198,18 @@ document.addEventListener('DOMContentLoaded', function() {
 
   // 刪除預設參數：只記錄到 defaultParamsCancel 白名單，不動內建清單、也不持久化 defaultParams。
   function deleteDefaultParam(paramToDelete) {
-    chrome.storage.sync.get(['defaultParamsCancel', 'url_parameter_eraser_params'], function(data) {
-      let cancelList = Array.isArray(data.defaultParamsCancel) ? data.defaultParamsCancel : [];
+    chrome.storage.sync.get(['defaultParamsCancel'], function(data) {
+      const cancelList = Array.isArray(data.defaultParamsCancel) ? data.defaultParamsCancel : [];
       if (!cancelList.includes(paramToDelete)) cancelList.push(paramToDelete);
-      chrome.storage.sync.set({ defaultParamsCancel: cancelList }, function() {
-        let customParams = Array.isArray(data.url_parameter_eraser_params) ? data.url_parameter_eraser_params : [];
-        updateParamsList(paramsList, getEffectiveDefaultParams(cancelList), customParams, deleteDefaultParam, deleteCustomParam);
-      });
+      chrome.storage.sync.set({ defaultParamsCancel: cancelList }, refreshAll);
     });
   }
 
   // 刪除 customParams 中的參數
   function deleteCustomParam(paramToDelete) {
-    getStoredParams(['url_parameter_eraser_params', 'defaultParamsCancel'], function(data) {
-      let customParams = Array.isArray(data.url_parameter_eraser_params) ? data.url_parameter_eraser_params : [];
-      // 兼容舊格式，補 domain
-      customParams = customParams.map(p => {
-        if (typeof p === 'string') return {param: p, note: '', domain: ''};
-        if (!('domain' in p)) p.domain = '';
-        return p;
-      });
-      const updatedParams = customParams.filter(p => p.param !== paramToDelete);
-      saveParams('url_parameter_eraser_params', updatedParams, function() {
-        // 預設參數一律用「內建清單 − cancel」，避免被刪的預設參數重新出現
-        updateParamsList(paramsList, getEffectiveDefaultParams(data.defaultParamsCancel), updatedParams, deleteDefaultParam, deleteCustomParam);
-      });
+    getStoredParams(['url_parameter_eraser_params'], function(data) {
+      const updatedParams = normalizeCustom(data.url_parameter_eraser_params).filter(p => p.param !== paramToDelete);
+      saveParams('url_parameter_eraser_params', updatedParams, refreshAll);
     });
   }
 

@@ -29,12 +29,15 @@ function saveParams(key, params, callback) {
 // 判斷某參數的清除機制：
 //   'before' → 在網頁「載入前」就從網址攔截移除，追蹤伺服器收不到該參數。
 //   'after'  → 無法在載入前表達，只能由 content script 在「載入後」清掃網頁內容與連結。
-// 判定邏輯與 dnr-rules.js 的 fallback 完全一致：
-//   非前綴參數一律可用 DNR；前綴參數（^ 開頭）唯有在 prefixExpansions 有展開表時才算 DNR。
-function getParamMechanism(param) {
+// 判定邏輯與 dnr-rules.js / background.js 完全一致：
+//   - 非前綴（完整名稱）參數：一律可用 DNR（不論內建或自訂）。
+//   - 前綴（^ 開頭）參數：唯有「內建」且在 prefixExpansions 有展開表時才算 DNR；
+//     使用者自訂的 ^ 前綴不查展開表（不替使用者決定 DNR），故為 'after'。
+function getParamMechanism(param, isDefault) {
   const resolve = globalThis.resolveRemoveParamNames;
+  const expansions = isDefault ? globalThis.prefixExpansions : null;
   const names = typeof resolve === 'function'
-    ? resolve(param, globalThis.prefixExpansions)
+    ? resolve(param, expansions)
     : (typeof param === 'string' && param && !param.startsWith('^') ? [param] : null);
   return names ? 'before' : 'after';
 }
@@ -58,7 +61,8 @@ function createParamsListElement(el, paramObj, isDefault, deleteCallback) {
   }
 
   // 清除機制：標示此參數是「載入前完全攔截」還是「載入後連結清掃」（以底色區分，不用圖示）
-  const mechanism = getParamMechanism(param);
+  // 自訂參數（isDefault=false）的 ^ 前綴不走 DNR，故須帶入來源。
+  const mechanism = getParamMechanism(param, isDefault);
   const isBefore = mechanism === 'before';
   li.classList.add(isBefore ? 'mech-before' : 'mech-after');
 

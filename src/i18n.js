@@ -48,6 +48,8 @@ document.addEventListener('DOMContentLoaded', () => {
       if (mechAfterLabel) mechAfterLabel.textContent = chrome.i18n.getMessage('optionsMechAfterLabel');
       const mechAfter = document.getElementById('mechanismAfterText');
       if (mechAfter) mechAfter.textContent = chrome.i18n.getMessage('optionsMechAfter');
+      const restoreTitle = document.getElementById('restoreTitle');
+      if (restoreTitle) restoreTitle.textContent = chrome.i18n.getMessage('optionsRestoreTitle');
     }
   };
 

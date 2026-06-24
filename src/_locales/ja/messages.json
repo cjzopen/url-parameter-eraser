@@ -43,6 +43,15 @@
   "optionsPrefixTableTitle": {
     "message": "以下のプレフィックスは組み込み済みで、ページ読み込み前にこれらの完全なパラメータを自動的にブロックします。手動で追加する必要はありません："
   },
+  "optionsRestoreTitle": {
+    "message": "削除した組み込みパラメータ（復元可能）"
+  },
+  "optionsRestoreButton": {
+    "message": "復元"
+  },
+  "optionsDuplicateMsg": {
+    "message": "「$1」は既に存在します。重複して追加する必要はありません。"
+  },
   "popupTitle": {
     "message": "URL Parameter Eraser"
   },

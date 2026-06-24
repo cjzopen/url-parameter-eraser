@@ -135,6 +135,46 @@ input[type="text"].underline-input {
 .prefix-table td {
   word-break: break-word;
 }
+.add-feedback {
+  min-height: 1.2em;
+  margin-top: .25rem;
+  font-size: 14px;
+  color: var(--main-color);
+  &.is-error {
+    color: #ff2453;
+  }
+}
+.restore-section {
+  margin-top: 2rem;
+}
+.restore-list {
+  list-style: none;
+  padding: 0;
+  display: flex;
+  flex-wrap: wrap;
+  gap: 8px;
+}
+.restore-list li {
+  display: inline-flex;
+  align-items: center;
+  gap: 8px;
+  padding: 4px 4px 4px 14px;
+  border-radius: 20px;
+  box-shadow: 0 0 0 1px color-mix(in srgb, var(--main-color) 40%, transparent);
+}
+.restore-list .restore-name {
+  font-family: monospace;
+  color: var(--main-color);
+}
+.restore-list .restore-btn {
+  padding: 4px 12px;
+  border-radius: 16px;
+  background-color: var(--main-color);
+  color: var(--white-color);
+  &:hover {
+    background-color: var(--main-color-hover);
+  }
+}
 #paramsList {
   list-style-type: none;
   padding: 0;
@@ -266,6 +306,7 @@ input[type="text"].underline-input {
     <div>
       <button id="add">__MSG_optionsAddButton__</button>
     </div>
+    <div id="addFeedback" class="add-feedback" aria-live="polite"></div>
   </div>
   
   <!-- <div id="tempMessage">__MSG_optionsTempMessage__</div> -->
@@ -283,6 +324,10 @@ input[type="text"].underline-input {
   </div>
   <div id="prefixTable" class="prefix-table"></div>
   <ul id="paramsList"></ul>
+  <div id="restoreSection" class="restore-section" hidden>
+    <h2 id="restoreTitle">__MSG_optionsRestoreTitle__</h2>
+    <ul id="restoreList" class="restore-list"></ul>
+  </div>
   <h2 style="margin-top: 4rem;" id="styleTitle">__MSG_optionsStyleTitle__</h2>
   <div>
     <label for="outlineColorPicker">Outline color：</label>

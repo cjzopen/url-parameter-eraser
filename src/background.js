@@ -17,11 +17,13 @@ function getEffectiveParams(callback) {
     const custom = Array.isArray(data.url_parameter_eraser_params) ? data.url_parameter_eraser_params : [];
     const cancel = Array.isArray(data.defaultParamsCancel) ? data.defaultParamsCancel : [];
     const cancelKeys = new Set(cancel.map(c => (typeof c === 'string' ? c : (c && c.param))).filter(Boolean));
-    const normalize = (p) => (typeof p === 'string'
-      ? { param: p, domain: '' }
-      : { param: p && p.param, domain: (p && p.domain) || '' });
-    const effectiveDefaults = defaults.map(normalize).filter(p => p.param && !cancelKeys.has(p.param));
-    const effectiveCustom = custom.map(normalize).filter(p => p.param);
+    const normalize = (p, isDefault) => (typeof p === 'string'
+      ? { param: p, domain: '', isDefault }
+      : { param: p && p.param, domain: (p && p.domain) || '', isDefault });
+    // isDefault 標記決定 DNR 是否套用 prefixExpansions（見 dnr-rules.js）：
+    // 內建預設 → 可展開 ^ 前綴；自訂 → 不展開，^ 前綴落到 content script。
+    const effectiveDefaults = defaults.map(p => normalize(p, true)).filter(p => p.param && !cancelKeys.has(p.param));
+    const effectiveCustom = custom.map(p => normalize(p, false)).filter(p => p.param);
     callback([...effectiveDefaults, ...effectiveCustom]);
   });
 }

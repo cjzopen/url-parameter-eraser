@@ -28,8 +28,10 @@
     return [param];
   }
 
-  // params：已套用 cancel 白名單過濾後的清單，元素為 { param, domain }。
+  // params：已套用 cancel 白名單過濾後的清單，元素為 { param, domain, isDefault }。
   // 回傳 { rules, fallback }；fallback 為無法用 DNR 表達、需由 content script 補清的參數名。
+  // 注意：prefixExpansions 只服務「內建預設參數」（isDefault === true）。使用者自訂參數
+  // 不查展開表 —— 非前綴名稱仍可精確 DNR，但自訂的 ^ 前綴一律落到 fallback（不替使用者決定 DNR）。
   function buildDnrRules(params, prefixExpansions, domainExpansions, startId) {
     let id = typeof startId === 'number' ? startId : 1;
     const globalRemove = new Set();
@@ -38,7 +40,8 @@
 
     (Array.isArray(params) ? params : []).forEach(p => {
       if (!p || !p.param) return;
-      const names = resolveRemoveParamNames(p.param, prefixExpansions);
+      const exp = p.isDefault ? prefixExpansions : null;
+      const names = resolveRemoveParamNames(p.param, exp);
       const domain = (p.domain || '').trim();
       if (!names) {
         fallback.push(p.param);

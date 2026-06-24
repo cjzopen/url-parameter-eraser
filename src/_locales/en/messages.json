@@ -42,6 +42,15 @@
   "optionsPrefixTableTitle": {
     "message": "The following prefixes are built in and automatically block these full parameters before the page loads — no need to add them manually:"
   },
+  "optionsRestoreTitle": {
+    "message": "Deleted built-in parameters (restorable)"
+  },
+  "optionsRestoreButton": {
+    "message": "Restore"
+  },
+  "optionsDuplicateMsg": {
+    "message": "\"$1\" already exists; no need to add it again."
+  },
   "popupTitle": {
     "message": "URL Parameter Eraser"
   },

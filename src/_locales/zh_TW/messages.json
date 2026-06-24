@@ -43,6 +43,15 @@
   "optionsPrefixTableTitle": {
     "message": "以下前綴已內建，會在網頁載入前自動攔截這些完整參數，無需手動新增："
   },
+  "optionsRestoreTitle": {
+    "message": "已刪除的內建參數（可還原）"
+  },
+  "optionsRestoreButton": {
+    "message": "還原"
+  },
+  "optionsDuplicateMsg": {
+    "message": "「$1」已存在，無需重複新增。"
+  },
   "popupTitle": {
     "message": "URL Parameter Eraser"
   },
