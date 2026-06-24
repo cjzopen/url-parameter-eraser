@@ -40,8 +40,12 @@ document.addEventListener('DOMContentLoaded', () => {
       // 追蹤參數清除機制圖例
       const mechTitle = document.getElementById('mechanismTitle');
       if (mechTitle) mechTitle.textContent = chrome.i18n.getMessage('optionsMechTitle');
+      const mechBeforeLabel = document.getElementById('mechanismBeforeLabel');
+      if (mechBeforeLabel) mechBeforeLabel.textContent = chrome.i18n.getMessage('optionsMechBeforeLabel');
       const mechBefore = document.getElementById('mechanismBeforeText');
       if (mechBefore) mechBefore.textContent = chrome.i18n.getMessage('optionsMechBefore');
+      const mechAfterLabel = document.getElementById('mechanismAfterLabel');
+      if (mechAfterLabel) mechAfterLabel.textContent = chrome.i18n.getMessage('optionsMechAfterLabel');
       const mechAfter = document.getElementById('mechanismAfterText');
       if (mechAfter) mechAfter.textContent = chrome.i18n.getMessage('optionsMechAfter');
     }

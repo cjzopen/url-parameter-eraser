@@ -26,19 +26,22 @@
     "message": "リンク書き換えのスタイル設定"
   },
   "optionsMechTitle": {
-    "message": "トラッキングパラメータの除去方式"
+    "message": "トラッキングパラメータの2つの除去方式"
   },
   "optionsMechBefore": {
-    "message": "読み込み前にブロック：リクエスト送信前に除去されるため、トラッカーには届きません。"
+    "message": "ページ読み込み前にURLから除去し、リダイレクトを含めて完全にブロックします。ただし、完全一致（大文字・小文字も区別）するパラメータのみが対象です。"
   },
   "optionsMechAfter": {
-    "message": "読み込み後のみ整理：リクエストは送信済みで、アドレスバーとページ内リンクのみを整理します。"
+    "message": "「^」（前方一致）フィルタが使え、大文字・小文字を区別しません。"
   },
   "optionsMechBeforeLabel": {
-    "message": "🛡 読み込み前にブロック（DNR）"
+    "message": "完全ブロック"
   },
   "optionsMechAfterLabel": {
-    "message": "🧹 読み込み後のみ整理"
+    "message": "ページ内容・リンクの整理"
+  },
+  "optionsPrefixTableTitle": {
+    "message": "以下のプレフィックスは組み込み済みで、ページ読み込み前にこれらの完全なパラメータを自動的にブロックします。手動で追加する必要はありません："
   },
   "popupTitle": {
     "message": "URL Parameter Eraser"

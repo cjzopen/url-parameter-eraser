@@ -9,6 +9,36 @@ document.addEventListener('DOMContentLoaded', function() {
   const enableOutlineCheckbox = document.getElementById('enableOutline');
   const outlineDemo = document.getElementById('outlineDemo');
 
+  // 「載入前固定攔截」前綴對照表：直接由 prefixExpansions 產生（與 DNR 規則同源），
+  // 表格增修時此處自動同步。讓使用者知道這些前綴已內建、無需手動新增。
+  function renderPrefixTable() {
+    const container = document.getElementById('prefixTable');
+    if (!container) return;
+    const expansions = (typeof globalThis !== 'undefined' && globalThis.prefixExpansions) || {};
+    const prefixes = Object.keys(expansions);
+    if (!prefixes.length) return;
+
+    const title = document.createElement('div');
+    title.className = 'prefix-table-title';
+    title.textContent = chrome.i18n.getMessage('optionsPrefixTableTitle');
+    container.appendChild(title);
+
+    const table = document.createElement('table');
+    prefixes.forEach(prefix => {
+      const names = Array.isArray(expansions[prefix]) ? expansions[prefix] : [];
+      const tr = document.createElement('tr');
+      const th = document.createElement('th');
+      th.textContent = prefix;
+      const td = document.createElement('td');
+      td.textContent = names.join(', ');
+      tr.appendChild(th);
+      tr.appendChild(td);
+      table.appendChild(tr);
+    });
+    container.appendChild(table);
+  }
+  renderPrefixTable();
+
   // 限制輸入內容並進行正則表達式轉義
   customParamsInput.addEventListener('input', function() {
     // 僅允許以 ^ 開頭的文字，後續部分僅允許英文、數字、-、_、.

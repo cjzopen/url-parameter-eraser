@@ -97,9 +97,43 @@ input[type="text"].underline-input {
     align-items: flex-start;
     gap: .5rem;
   }
-  .mechanism-icon {
+  .mechanism-label {
     flex-shrink: 0;
+    font-weight: bold;
+    color: var(--main-color);
+    white-space: nowrap;
   }
+}
+.prefix-table {
+  max-width: 640px;
+  margin: 0 0 1.5rem;
+  font-size: 13px;
+}
+.prefix-table-title {
+  margin-bottom: .5rem;
+  color: var(--main-color);
+  font-weight: bold;
+  line-height: 1.5;
+}
+.prefix-table table {
+  border-collapse: collapse;
+  width: 100%;
+}
+.prefix-table th,
+.prefix-table td {
+  border: 1px solid color-mix(in srgb, var(--main-color) 25%, transparent);
+  padding: 4px 8px;
+  text-align: left;
+  vertical-align: top;
+}
+.prefix-table th {
+  white-space: nowrap;
+  font-family: monospace;
+  color: var(--main-color);
+  background-color: color-mix(in srgb, var(--main-color) 8%, transparent);
+}
+.prefix-table td {
+  word-break: break-word;
 }
 #paramsList {
   list-style-type: none;
@@ -239,14 +273,15 @@ input[type="text"].underline-input {
   <div id="mechanismLegend" class="mechanism-legend">
     <div id="mechanismTitle" class="mechanism-legend-title">__MSG_optionsMechTitle__</div>
     <div class="mechanism-legend-row">
-      <span class="mechanism-icon">🛡</span>
+      <span class="mechanism-label" id="mechanismBeforeLabel">__MSG_optionsMechBeforeLabel__</span>
       <span id="mechanismBeforeText">__MSG_optionsMechBefore__</span>
     </div>
     <div class="mechanism-legend-row">
-      <span class="mechanism-icon">🧹</span>
+      <span class="mechanism-label" id="mechanismAfterLabel">__MSG_optionsMechAfterLabel__</span>
       <span id="mechanismAfterText">__MSG_optionsMechAfter__</span>
     </div>
   </div>
+  <div id="prefixTable" class="prefix-table"></div>
   <ul id="paramsList"></ul>
   <h2 style="margin-top: 4rem;" id="styleTitle">__MSG_optionsStyleTitle__</h2>
   <div>

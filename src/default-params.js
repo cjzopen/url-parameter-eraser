@@ -132,7 +132,9 @@ globalThis.prefixExpansions = {
   '^pf_rd_': ['pf_rd_p', 'pf_rd_r', 'pf_rd_s', 'pf_rd_t', 'pf_rd_i', 'pf_rd_m'],
   '^share_': ['share_source', 'share_medium', 'share_plat', 'share_session_id', 'share_tag'],
   '^highlightedUpdate': ['highlightedUpdateUrn'],
-  '^__cft__': ['__cft__[0]'],
+  // 注意：^__cft__ 刻意不展開。其實際參數名為 __cft__[0]（含中括號），
+  // 非合法的 DNR removeParam 名稱、且在 URL 中常被編碼，硬塞 DNR 不可靠，
+  // 故交由 content script 在載入後以 ^ 開頭比對清除。
   '^itm_': ['itm_source', 'itm_medium', 'itm_campaign', 'itm_content', 'itm_term']
 };
 

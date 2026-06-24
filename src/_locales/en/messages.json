@@ -25,19 +25,22 @@
     "message": "Link Style Settings"
   },
   "optionsMechTitle": {
-    "message": "How tracking parameters are removed"
+    "message": "Two ways tracking parameters are removed"
   },
   "optionsMechBefore": {
-    "message": "Blocked before load: removed before the request is sent, so the tracker never receives it."
+    "message": "Removed from the URL before the page loads, fully blocking the tracker even through redirects. This can only filter parameters that match exactly, including letter case."
   },
   "optionsMechAfter": {
-    "message": "Cleaned after load only: the request has already been sent; only the address bar and on-page links are cleaned."
+    "message": "Supports the \"^\" (starts-with) filter and is case-insensitive."
   },
   "optionsMechBeforeLabel": {
-    "message": "🛡 Blocked before load (DNR)"
+    "message": "Full block"
   },
   "optionsMechAfterLabel": {
-    "message": "🧹 Cleaned after load only"
+    "message": "Page content & link cleanup"
+  },
+  "optionsPrefixTableTitle": {
+    "message": "The following prefixes are built in and automatically block these full parameters before the page loads — no need to add them manually:"
   },
   "popupTitle": {
     "message": "URL Parameter Eraser"

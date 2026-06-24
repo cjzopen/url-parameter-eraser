@@ -26,19 +26,22 @@
     "message": "改寫連結的樣式設定"
   },
   "optionsMechTitle": {
-    "message": "追蹤參數清除機制"
+    "message": "追蹤參數的兩種清除方式"
   },
   "optionsMechBefore": {
-    "message": "載入前攔截：請求送出前就移除，追蹤方收不到。"
+    "message": "網頁載入前就從網址移除追蹤碼，完全阻隔包含轉址等追蹤情況。但此功能只能過濾完全相符、大小寫一致的參數。"
   },
   "optionsMechAfter": {
-    "message": "僅載入後清理：請求已送出，只清掉網址列與頁面連結。"
+    "message": "可使用「^」（開頭為…）的過濾方式，且不分大小寫。"
   },
   "optionsMechBeforeLabel": {
-    "message": "🛡 載入前攔截（DNR）"
+    "message": "完全攔截"
   },
   "optionsMechAfterLabel": {
-    "message": "🧹 僅載入後清理"
+    "message": "網頁內容連結清掃"
+  },
+  "optionsPrefixTableTitle": {
+    "message": "以下前綴已內建，會在網頁載入前自動攔截這些完整參數，無需手動新增："
   },
   "popupTitle": {
     "message": "URL Parameter Eraser"

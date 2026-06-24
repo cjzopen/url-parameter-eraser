@@ -27,8 +27,8 @@ function saveParams(key, params, callback) {
 }
 
 // 判斷某參數的清除機制：
-//   'before' → declarativeNetRequest 在「載入前」攔截（🛡），追蹤伺服器收不到該參數。
-//   'after'  → 無法用 DNR 表達，只能由 content script 在「載入後」補清（🧹）。
+//   'before' → 在網頁「載入前」就從網址攔截移除，追蹤伺服器收不到該參數。
+//   'after'  → 無法在載入前表達，只能由 content script 在「載入後」清掃網頁內容與連結。
 // 判定邏輯與 dnr-rules.js 的 fallback 完全一致：
 //   非前綴參數一律可用 DNR；前綴參數（^ 開頭）唯有在 prefixExpansions 有展開表時才算 DNR。
 function getParamMechanism(param) {
@@ -57,19 +57,18 @@ function createParamsListElement(el, paramObj, isDefault, deleteCallback) {
     li.classList.add('domain-only');
   }
 
-  // 清除機制：標示此參數是「載入前攔截 (DNR)」還是「載入後清除」
+  // 清除機制：標示此參數是「載入前完全攔截」還是「載入後連結清掃」（以底色區分，不用圖示）
   const mechanism = getParamMechanism(param);
   const isBefore = mechanism === 'before';
-  const mechIcon = isBefore ? '🛡' : '🧹';
   li.classList.add(isBefore ? 'mech-before' : 'mech-after');
 
   // popoverId 只允許 _, -, 英文
   const safeParamIdName = param.replace(/[^a-zA-Z_-]/g, '');
   const popoverId = `param-${safeParamIdName}`;
 
-  // Popover 按鈕（前綴清除機制圖示，方便整列掃視）
+  // Popover 按鈕（清除機制以 li 底色區分，按鈕只顯示參數名）
   const popoverBtn = document.createElement('button');
-  popoverBtn.textContent = `${mechIcon} ${param}`;
+  popoverBtn.textContent = param;
   popoverBtn.setAttribute('popovertarget', popoverId);
   popoverBtn.classList.add('paramsListPopover');
   li.appendChild(popoverBtn);
