@@ -150,19 +150,39 @@ document.addEventListener('DOMContentLoaded', function() {
     getStoredParams(['url_parameter_eraser_params', 'defaultParamsCancel'], function(data) {
       const cancel = Array.isArray(data.defaultParamsCancel) ? data.defaultParamsCancel : [];
       const existingParams = normalizeCustom(data.url_parameter_eraser_params);
-      // 有效集合 = 內建（−cancel）+ 現有自訂；命中即視為「已存在」，不重複新增。
-      const activeNames = new Set([
-        ...getEffectiveDefaultParams(cancel).map(p => (typeof p === 'string' ? p : p.param)),
-        ...existingParams.map(p => p.param)
-      ]);
+      // 有效集合 = 內建（−cancel）+ 現有自訂；保留各自的 domain 以判斷前綴涵蓋。
+      const activeList = [
+        ...getEffectiveDefaultParams(cancel).map(p => (typeof p === 'string'
+          ? { param: p, domain: '' }
+          : { param: p.param, domain: p.domain || '' })),
+        ...existingParams.map(p => ({ param: p.param, domain: p.domain || '' }))
+      ];
+      // 是否已被「載入前 DNR」涵蓋（視為冗餘，不重複新增）。判準是 DNR、不是 content script：
+      //   1. 同名（完整字串相同）。
+      //   2. 此名稱已列在某個「全站」內建前綴的 DNR 展開名單（prefixExpansions）內，
+      //      例如 utm_source 在 ^utm_ 的展開名單 → DNR 載入前已清 → 擋。
+      //      反之 utm_abc 不在展開名單 → DNR 清不到（只有 content script 載入後清）→
+      //      新增後才會取得自己的 DNR 規則，是真的加值，不可擋。
+      //      限定網域的前綴（如 ^hv 只限 amazon.co）不算涵蓋全站新增，故排除。
+      const prefixExpansions = (typeof globalThis !== 'undefined' && globalThis.prefixExpansions) || {};
+      function isCovered(candidate) {
+        return activeList.some(a => {
+          if (a.param === candidate) return true;
+          if (a.param.startsWith('^') && (!a.domain || a.domain.trim() === '')) {
+            const names = prefixExpansions[a.param];
+            return Array.isArray(names) && names.includes(candidate);
+          }
+          return false;
+        });
+      }
       const added = [];
       const duplicates = [];
       inputs.forEach(param => {
-        if (activeNames.has(param)) {
+        if (isCovered(param)) {
           duplicates.push(param);
         } else {
           existingParams.push({ param, note, domain });
-          activeNames.add(param);
+          activeList.push({ param, domain });
           added.push(param);
         }
       });
@@ -238,7 +258,6 @@ document.addEventListener('DOMContentLoaded', function() {
 
   // 載入 outline 設定
   chrome.storage.local.get(['outlineColorHex', 'outlineAlpha', 'disableOutline'], function(data) {
-    console.log(data.outlineColorHex);
     if (data.outlineColorHex) outlineColorPicker.value = data.outlineColorHex;
     if (data.outlineAlpha) outlineAlphaRange.value = data.outlineAlpha;
     if (typeof data.disableOutline === 'boolean') enableOutlineCheckbox.checked = data.disableOutline;

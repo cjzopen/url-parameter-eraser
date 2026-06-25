@@ -1,5 +1,3 @@
-// console.log("Background script started.");
-
 // 載入共用的預設參數清單與 DNR 規則產生器（classic service worker，可用 importScripts）。
 importScripts('default-params.js', 'dnr-rules.js');
 
@@ -39,8 +37,6 @@ function rebuildDnrRules() {
       chrome.declarativeNetRequest.updateDynamicRules({ removeRuleIds, addRules: rules }, () => {
         if (chrome.runtime.lastError) {
           console.error('Failed to update DNR rules:', chrome.runtime.lastError.message);
-        } else {
-          console.log(`DNR rules updated: ${rules.length} rule(s), ${fallback.length} fallback-only param(s).`);
         }
       });
     });
@@ -109,8 +105,6 @@ function cleanUpTabStorage() {
     chrome.storage.local.remove(keysToRemove, () => {
       if (chrome.runtime.lastError) {
         console.error("Failed to clean up tab storage:", chrome.runtime.lastError.message);
-      } else {
-        console.log("Cleaned up tab storage:", keysToRemove);
       }
     });
   });
@@ -137,8 +131,6 @@ chrome.tabs.onRemoved.addListener(tabId => {
   chrome.storage.local.remove(`tab_${tabId}`, () => {
     if (chrome.runtime.lastError) {
       console.error(`Failed to remove storage for tab_${tabId}:`, chrome.runtime.lastError.message);
-    } else {
-      console.log(`Removed storage for tab_${tabId}`);
     }
   });
 });

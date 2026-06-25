@@ -117,7 +117,7 @@ globalThis.defaultParams = [
 // DNR 的 removeParams 只能精確比對參數名，無法做前綴比對，所以這裡把常見的後綴列舉出來。
 // 未列到的罕見後綴仍由 content script 在載入後（DOM 改寫 / cleanCurrentPageURL）補清。
 globalThis.prefixExpansions = {
-  '^utm_': ['utm_source', 'utm_medium', 'utm_campaign', 'utm_term', 'utm_content', 'utm_id'],
+  '^utm_': ['utm_source', 'utm_medium', 'utm_campaign', 'utm_term', 'utm_content', 'utm_id', 'utm_team', 'utm_theme'],
   '^stm_': ['stm_source', 'stm_medium', 'stm_campaign', 'stm_term', 'stm_content'],
   '^__hs': ['__hssc', '__hstc', '__hsfp'],
   '^_hs': ['_hsenc', '_hsmi'],

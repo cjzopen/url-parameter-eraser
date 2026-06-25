@@ -26,9 +26,6 @@ function initParamPattern(callback) {
         cancelArr = Array.isArray(syncData.defaultParamsCancel) ? syncData.defaultParamsCancel : [];
         window.defaultParamsCancel = cancelArr;
         const allParams = [...new Set([...defaultParams, ...customParams].map(p => p.param))].map(escapeRegex);
-        console.log('initParamPattern defaultParams:', defaultParams);
-        console.log('initParamPattern defaultParamsCancel:', window.defaultParamsCancel);
-        console.log('initParamPattern allParams:', allParams);
         paramPattern = new RegExp(allParams.join('|'), 'i');
         if (callback) callback(window.url_parameter_eraser_params = customParams);
       });
@@ -52,8 +49,6 @@ function saveState() {
     chrome.storage.local.set({ [`tab_${tabId}`]: dataToSave }, () => {
       if (chrome.runtime.lastError) {
         console.error("Failed to save state to storage:", chrome.runtime.lastError.message);
-      } else {
-        // console.log(`State saved for tab_${tabId}:`, dataToSave);
       }
     });
   }
